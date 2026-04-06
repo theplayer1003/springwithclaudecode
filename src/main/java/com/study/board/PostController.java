@@ -1,11 +1,6 @@
 package com.study.board;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,98 +10,72 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController                 // 이 클래스는 REST API를 처리하는 컨트롤러 (JSON 반환)
-@RequestMapping("/posts")       // 이 컨트롤러의 모든 URL은 /posts로 시작
+@RestController
+@RequestMapping("/posts")
 public class PostController {
 
-    // --- 메모리 저장소 (DB 대신 Map을 사용) ---
-    // Key: 게시글 ID, Value: Post 객체
-    private final Map<Long, Post> posts = new HashMap<>();
+    // HashMap과 AtomicLong이 사라지고, Repository로 교체됨
+    // 생성자 주입 — Phase 1에서 배운 DI 방식
+    private final PostRepository postRepository;
 
-    // ID 자동 증가를 위한 카운터
-    // AtomicLong: 여러 요청이 동시에 와도 안전하게 숫자를 증가시키는 클래스
-    private final AtomicLong idCounter = new AtomicLong(1);
+    public PostController(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
 
-    // ==========================================
-    // CREATE — 게시글 생성
-    // POST /posts
-    // ==========================================
+    // CREATE
     @PostMapping
     public ResponseEntity<Post> createPost(@RequestBody Post request) {
-        // 새 게시글 생성: ID는 서버가 자동 부여
-        Long newId = idCounter.getAndIncrement();
-        Post post = new Post(newId, request.getTitle(), request.getContent());
-
-        // 메모리에 저장
-        posts.put(newId, post);
-
-        // 201 Created 상태코드와 함께 생성된 게시글 반환
-        return ResponseEntity.status(HttpStatus.CREATED).body(post);
+        // ID는 DB가 자동 생성하므로 title, content만 넘김
+        Post post = new Post(request.getTitle(), request.getContent());
+        Post saved = postRepository.save(post);  // DB에 저장
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    // ==========================================
-    // READ — 게시글 목록 조회
-    // GET /posts
-    // ==========================================
+    // READ — 목록
     @GetMapping
     public List<Post> getAllPosts() {
-        // Map의 모든 값(Post)을 리스트로 변환해서 반환
-        return new ArrayList<>(posts.values());
+        return postRepository.findAll();  // DB에서 전체 조회
     }
 
-    // ==========================================
-    // READ — 게시글 단건 조회
-    // GET /posts/{id}
-    // ==========================================
+    // READ — 단건
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPost(@PathVariable Long id) {
-        Post post = posts.get(id);
-
-        // 해당 ID의 게시글이 없으면 404 반환
-        if (post == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(post);
+        return postRepository.findById(id)          // Optional<Post> 반환
+                .map(ResponseEntity::ok)             // 있으면 200 + body
+                .orElse(ResponseEntity.notFound().build());  // 없으면 404
     }
 
-    // ==========================================
-    // UPDATE — 게시글 수정
-    // PUT /posts/{id}
-    // ==========================================
+    // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<Post> updatePost(@PathVariable Long id,
                                            @RequestBody Post request) {
-        Post post = posts.get(id);
-
-        // 해당 ID의 게시글이 없으면 404 반환
-        if (post == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // 기존 게시글의 제목과 내용을 수정
-        post.setTitle(request.getTitle());
-        post.setContent(request.getContent());
-
-        return ResponseEntity.ok(post);
+        return postRepository.findById(id)
+                .map(post -> {
+                    post.setTitle(request.getTitle());
+                    post.setContent(request.getContent());
+                    Post updated = postRepository.save(post);  // 변경된 내용 저장
+                    return ResponseEntity.ok(updated);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // ==========================================
-    // DELETE — 게시글 삭제
-    // DELETE /posts/{id}
-    // ==========================================
+    // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        Post removed = posts.remove(id);
-
-        // 해당 ID의 게시글이 없으면 404 반환
-        if (removed == null) {
+        if (!postRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-
-        // 204 No Content — 삭제 성공, 반환할 데이터 없음
+        postRepository.deleteById(id);  // DB에서 삭제 (cascade로 댓글도 함께 삭제)
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Post>> findByTitleContaining(@RequestParam String keyword) {
+        List<Post> posts = postRepository.findByTitleContaining(keyword);
+
+        return ResponseEntity.ok(posts);
     }
 }

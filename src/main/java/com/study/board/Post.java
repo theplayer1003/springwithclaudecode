@@ -1,34 +1,50 @@
 package com.study.board;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+@Entity  // 이 클래스가 DB 테이블과 매핑됨 → "posts" 테이블이 자동 생성됨
 public class Post {
 
-    private Long id;                    // 게시글 고유 번호
-    private String title;               // 제목
-    private String content;             // 내용
-    private LocalDateTime createdAt;    // 작성 시간
+    @Id  // 기본키(Primary Key)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // DB가 ID를 자동 증가시킴
+    private Long id;
 
-    // 기본 생성자 — Jackson이 JSON → 객체 변환할 때 필요
-    public Post() {
+    private String title;
+
+    private String content;
+
+    private LocalDateTime createdAt;
+
+    // 양방향 관계: 게시글(1) : 댓글(N)
+    // mappedBy = "post" → Comment 클래스의 post 필드에 의해 매핑됨 (읽기 전용)
+    // cascade = ALL → 게시글 저장/삭제 시 댓글도 함께 저장/삭제
+    // orphanRemoval = true → 댓글 목록에서 제거된 댓글은 DB에서도 삭제
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    // JPA는 기본 생성자가 필수. protected로 외부 직접 사용을 제한
+    protected Post() {
     }
 
-    public Post(Long id, String title, String content) {
-        this.id = id;
+    public Post(String title, String content) {
         this.title = title;
         this.content = content;
         this.createdAt = LocalDateTime.now();
     }
 
     // --- getter / setter ---
-    // Jackson은 getter로 객체 → JSON 변환, setter로 JSON → 객체 변환
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getTitle() {
@@ -51,7 +67,7 @@ public class Post {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public List<Comment> getComments() {
+        return comments;
     }
 }

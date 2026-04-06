@@ -23,15 +23,15 @@
 ## Phase 1: 스프링 부트 입문 (3~4일)
 **목표:** 스프링 부트가 무엇인지 이해하고, 첫 번째 REST API를 만든다.
 
-- [ ] 스프링 부트 핵심 개념 이해 (IoC/DI, 빈)
-- [ ] 스프링 부트 프로젝트 생성 (Spring Initializr)
-- [ ] 프로젝트 구조 이해 (main, resources, build.gradle)
-- [ ] `@RestController`, `@GetMapping`, `@PostMapping` 사용
-- [ ] JSON 요청/응답 처리
-- [ ] 메모리 기반 게시글 CRUD API 구현
-- [ ] 직접 도전 과제 수행
-- [ ] 코드 리뷰 및 리팩토링
-- [ ] Phase 1 학습 문서 작성 및 리뷰
+- [x] 스프링 부트 핵심 개념 이해 (IoC/DI, 빈)
+- [x] 스프링 부트 프로젝트 생성 (Spring Initializr)
+- [x] 프로젝트 구조 이해 (main, resources, build.gradle)
+- [x] `@RestController`, `@GetMapping`, `@PostMapping` 사용
+- [x] JSON 요청/응답 처리
+- [x] 메모리 기반 게시글 CRUD API 구현
+- [x] 직접 도전 과제 수행
+- [x] 코드 리뷰 및 리팩토링
+- [x] Phase 1 학습 문서 작성 및 리뷰
 
 ## Phase 2: 데이터베이스 연동 (4~5일)
 **목표:** JPA를 사용해 실제 DB에 데이터를 저장한다.
