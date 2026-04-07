@@ -19,6 +19,7 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")  // JPA + Hibernate
     runtimeOnly("com.h2database:h2")                                         // H2 인메모리 DB
     testImplementation("org.springframework.boot:spring-boot-starter-test")

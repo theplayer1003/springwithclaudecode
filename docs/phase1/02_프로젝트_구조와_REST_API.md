@@ -55,6 +55,7 @@ dependencies {
 ```
 
 콘솔 프로그램에서는 `.java` 파일을 직접 `javac`로 컴파일했지만, 스프링 프로젝트에서는:
+
 - **Gradle**이 의존성(외부 라이브러리)을 자동으로 다운로드하고
 - 컴파일, 테스트, 패키징을 모두 처리합니다
 
@@ -77,15 +78,15 @@ public class BoardApplication {
 ```
 
 - `@SpringBootApplication` — 이 하나의 어노테이션이 세 가지 역할을 합니다:
-  - `@SpringBootConfiguration` — 스프링 부트 설정 클래스임을 표시
-  - `@EnableAutoConfiguration` — 추가된 라이브러리를 보고 자동으로 설정 (예: web starter가 있으면 Tomcat 자동 설정)
-  - `@ComponentScan` — 이 클래스가 있는 패키지(`com.study.board`)와 하위 패키지에서 `@Component`, `@Controller` 등을 자동 탐색
+    - `@SpringBootConfiguration` — 스프링 부트 설정 클래스임을 표시
+    - `@EnableAutoConfiguration` — 추가된 라이브러리를 보고 자동으로 설정 (예: web starter가 있으면 Tomcat 자동 설정)
+    - `@ComponentScan` — 이 클래스가 있는 패키지(`com.study.board`)와 하위 패키지에서 `@Component`, `@Controller` 등을 자동 탐색
 
 - `SpringApplication.run()` — 이 한 줄이 실행되면:
-  1. 스프링 컨테이너(ApplicationContext) 생성
-  2. 빈 스캔 및 등록
-  3. 내장 Tomcat 서버 시작 (기본 포트: 8080)
-  4. 요청 대기 상태
+    1. 스프링 컨테이너(ApplicationContext) 생성
+    2. 빈 스캔 및 등록
+    3. 내장 Tomcat 서버 시작 (기본 포트: 8080)
+    4. 요청 대기 상태
 
 #### `application.properties` — 설정 파일
 
@@ -94,7 +95,6 @@ public class BoardApplication {
 ```properties
 # 서버 포트 변경
 server.port=8080
-
 # 로그 레벨 설정
 logging.level.root=INFO
 ```
@@ -110,6 +110,7 @@ logging.level.root=INFO
 **API(Application Programming Interface)**는 프로그램끼리 소통하는 규칙입니다.
 
 콘솔 프로그램에서는 사용자가 키보드로 직접 입력했지만, 웹에서는:
+
 - **프론트엔드**(웹 브라우저, 모바일 앱)가 **백엔드**(서버)에 데이터를 요청
 - 백엔드가 데이터를 응답
 
@@ -124,13 +125,13 @@ logging.level.root=INFO
 
 ### HTTP 메서드
 
-| 메서드 | 의미 | 예시 |
-|--------|------|------|
-| `GET` | 조회 (읽기) | 게시글 목록 보기, 특정 게시글 보기 |
-| `POST` | 생성 (쓰기) | 새 게시글 작성 |
-| `PUT` | 전체 수정 | 게시글 전체 내용 수정 |
-| `PATCH` | 부분 수정 | 게시글 제목만 수정 |
-| `DELETE` | 삭제 | 게시글 삭제 |
+| 메서드      | 의미      | 예시                   |
+|----------|---------|----------------------|
+| `GET`    | 조회 (읽기) | 게시글 목록 보기, 특정 게시글 보기 |
+| `POST`   | 생성 (쓰기) | 새 게시글 작성             |
+| `PUT`    | 전체 수정   | 게시글 전체 내용 수정         |
+| `PATCH`  | 부분 수정   | 게시글 제목만 수정           |
+| `DELETE` | 삭제      | 게시글 삭제               |
 
 ### 게시판 API 설계 예시
 
@@ -151,10 +152,10 @@ REST API에서 데이터를 주고받을 때는 주로 **JSON** 형식을 사용
 
 ```json
 {
-    "id": 1,
-    "title": "첫 번째 게시글",
-    "content": "안녕하세요!",
-    "createdAt": "2026-04-02T10:30:00"
+  "id": 1,
+  "title": "첫 번째 게시글",
+  "content": "안녕하세요!",
+  "createdAt": "2026-04-02T10:30:00"
 }
 ```
 
@@ -169,6 +170,7 @@ REST API에서 데이터를 주고받을 때는 주로 **JSON** 형식을 사용
 #### `@RestController`
 
 ```java
+
 @RestController
 public class PostController {
     // 이 클래스의 모든 메서드는 JSON을 반환한다
@@ -182,30 +184,32 @@ public class PostController {
 #### `@RequestMapping`과 HTTP 메서드 어노테이션
 
 ```java
+
 @RestController
 @RequestMapping("/posts")  // 이 컨트롤러의 모든 URL은 /posts로 시작
 public class PostController {
 
     @GetMapping           // GET /posts → 목록 조회
-    public List<Post> getAllPosts() { ... }
+    public List<Post> getAllPosts() { ...}
 
     @GetMapping("/{id}")  // GET /posts/1 → 단건 조회
-    public Post getPost(@PathVariable Long id) { ... }
+    public Post getPost(@PathVariable Long id) { ...}
 
     @PostMapping          // POST /posts → 생성
-    public Post createPost(@RequestBody PostRequest request) { ... }
+    public Post createPost(@RequestBody PostRequest request) { ...}
 
     @PutMapping("/{id}")  // PUT /posts/1 → 수정
-    public Post updatePost(@PathVariable Long id, @RequestBody PostRequest request) { ... }
+    public Post updatePost(@PathVariable Long id, @RequestBody PostRequest request) { ...}
 
     @DeleteMapping("/{id}") // DELETE /posts/1 → 삭제
-    public void deletePost(@PathVariable Long id) { ... }
+    public void deletePost(@PathVariable Long id) { ...}
 }
 ```
 
 #### `@PathVariable` — URL 경로에서 값 추출
 
 ```java
+
 @GetMapping("/{id}")
 public Post getPost(@PathVariable Long id) {
     // GET /posts/42 요청 시 → id = 42
@@ -217,6 +221,7 @@ URL의 `{id}` 부분이 매개변수 `id`에 자동으로 들어옵니다.
 #### `@RequestBody` — 요청 본문의 JSON을 객체로 변환
 
 ```java
+
 @PostMapping
 public Post createPost(@RequestBody PostRequest request) {
     // 클라이언트가 보낸 JSON이 PostRequest 객체로 자동 변환됨
@@ -224,11 +229,16 @@ public Post createPost(@RequestBody PostRequest request) {
 ```
 
 클라이언트가 이런 JSON을 보내면:
+
 ```json
-{ "title": "제목", "content": "내용" }
+{
+  "title": "제목",
+  "content": "내용"
+}
 ```
 
 스프링이 자동으로 `PostRequest` 객체에 매핑합니다:
+
 ```java
 public class PostRequest {
     private String title;
@@ -267,18 +277,19 @@ public class PostRequest {
 
 REST API에서 응답할 때 **상태 코드**도 함께 반환합니다:
 
-| 코드 | 의미 | 사용 예시 |
-|------|------|----------|
-| `200 OK` | 성공 | 조회 성공 |
-| `201 Created` | 생성 성공 | 게시글 생성 성공 |
-| `204 No Content` | 성공 (반환 데이터 없음) | 삭제 성공 |
-| `400 Bad Request` | 잘못된 요청 | 필수 값 누락 |
-| `404 Not Found` | 리소스 없음 | 존재하지 않는 게시글 조회 |
-| `500 Internal Server Error` | 서버 오류 | 서버 내부 에러 |
+| 코드                          | 의미             | 사용 예시          |
+|-----------------------------|----------------|----------------|
+| `200 OK`                    | 성공             | 조회 성공          |
+| `201 Created`               | 생성 성공          | 게시글 생성 성공      |
+| `204 No Content`            | 성공 (반환 데이터 없음) | 삭제 성공          |
+| `400 Bad Request`           | 잘못된 요청         | 필수 값 누락        |
+| `404 Not Found`             | 리소스 없음         | 존재하지 않는 게시글 조회 |
+| `500 Internal Server Error` | 서버 오류          | 서버 내부 에러       |
 
 스프링에서는 기본적으로 200을 반환하지만, `ResponseEntity`를 사용해서 상태 코드를 직접 지정할 수 있습니다:
 
 ```java
+
 @PostMapping
 public ResponseEntity<Post> createPost(@RequestBody PostRequest request) {
     Post post = postService.create(request);
@@ -292,19 +303,20 @@ public ResponseEntity<Post> createPost(@RequestBody PostRequest request) {
 
 ## 6. 핵심 정리
 
-| 개념 | 설명 |
-|------|------|
-| **build.gradle** | 프로젝트 의존성과 빌드 설정을 관리하는 파일 |
-| **@SpringBootApplication** | 자동 설정 + 컴포넌트 스캔 + 설정 클래스 역할 |
-| **application.properties** | 서버 포트, DB 연결 등 애플리케이션 설정 |
-| **REST API** | URL(자원) + HTTP 메서드(행위)로 구성된 API 설계 방식 |
-| **@RestController** | JSON 데이터를 반환하는 컨트롤러 |
-| **@GetMapping, @PostMapping 등** | HTTP 메서드와 URL을 메서드에 매핑 |
-| **@PathVariable** | URL 경로에서 변수 추출 |
-| **@RequestBody** | 요청 JSON을 자바 객체로 변환 |
-| **DispatcherServlet** | 모든 요청을 받아 적절한 컨트롤러로 전달하는 핵심 컴포넌트 |
+| 개념                              | 설명                                    |
+|---------------------------------|---------------------------------------|
+| **build.gradle**                | 프로젝트 의존성과 빌드 설정을 관리하는 파일              |
+| **@SpringBootApplication**      | 자동 설정 + 컴포넌트 스캔 + 설정 클래스 역할           |
+| **application.properties**      | 서버 포트, DB 연결 등 애플리케이션 설정              |
+| **REST API**                    | URL(자원) + HTTP 메서드(행위)로 구성된 API 설계 방식 |
+| **@RestController**             | JSON 데이터를 반환하는 컨트롤러                   |
+| **@GetMapping, @PostMapping 등** | HTTP 메서드와 URL을 메서드에 매핑                |
+| **@PathVariable**               | URL 경로에서 변수 추출                        |
+| **@RequestBody**                | 요청 JSON을 자바 객체로 변환                    |
+| **DispatcherServlet**           | 모든 요청을 받아 적절한 컨트롤러로 전달하는 핵심 컴포넌트      |
 
 ---
 
 ## 다음 주제
+
 이 개념들을 이해한 후, 다음으로 **JSON 요청/응답 처리**에 대해 더 자세히 학습합니다.
