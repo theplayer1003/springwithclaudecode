@@ -12,7 +12,7 @@
 ```java
 public class PostController {
     private PostService postService = new PostService();
-    
+
     public void createPost(String title) {
         postService.save(title);
     }
@@ -35,7 +35,7 @@ public class PostController {
 ```java
 // PostService가 DB 연결을 받도록 변경되었다면
 public class PostService {
-    public PostService(DatabaseConnection db) { ... }
+    public PostService(DatabaseConnection db) { ...}
 }
 ```
 
@@ -63,6 +63,7 @@ public class PostController {
 이렇게 클래스들이 서로를 강하게 알고 있는 것을 **결합도가 높다**고 합니다.
 
 결합도가 높으면:
+
 - 하나를 바꾸면 연쇄적으로 다른 것도 바꿔야 함
 - 코드 재사용이 어려움
 - 유지보수가 힘들어짐
@@ -97,10 +98,12 @@ PostController가 직접 PostService를 만든다
 ### 비유로 이해하기
 
 **직접 요리하기 (일반적인 방식)**
+
 - 장을 보고, 재료를 손질하고, 요리를 직접 한다
 - 재료가 바뀌면 요리 방법도 바꿔야 한다
 
 **레스토랑에서 주문하기 (IoC 방식)**
+
 - "스테이크 주세요"라고만 말한다
 - 어떤 재료를 쓰고, 어떻게 조리하는지는 주방(프레임워크)이 알아서 한다
 - 재료가 바뀌어도 나는 그냥 주문만 하면 된다
@@ -126,7 +129,7 @@ public class PostController {
 ```java
 public class PostController {
     private final PostService postService;
-    
+
     // 생성자를 통해 외부에서 PostService를 받는다
     public PostController(PostService postService) {
         this.postService = postService;
@@ -135,6 +138,7 @@ public class PostController {
 ```
 
 차이를 보세요:
+
 - `new PostService()`가 사라졌습니다
 - 대신 **생성자의 매개변수**로 `PostService`를 받습니다
 - 누가 넣어주는지? → **스프링이 자동으로 넣어줍니다**
@@ -146,10 +150,11 @@ public class PostController {
 #### (1) 생성자 주입 (권장)
 
 ```java
+
 @RestController
 public class PostController {
     private final PostService postService;
-    
+
     public PostController(PostService postService) {
         this.postService = postService;
     }
@@ -163,6 +168,7 @@ public class PostController {
 #### (2) 필드 주입
 
 ```java
+
 @RestController
 public class PostController {
     @Autowired
@@ -176,10 +182,11 @@ public class PostController {
 #### (3) 세터 주입
 
 ```java
+
 @RestController
 public class PostController {
     private PostService postService;
-    
+
     @Autowired
     public void setPostService(PostService postService) {
         this.postService = postService;
@@ -202,12 +209,12 @@ public class PostController {
 
 ### 빈으로 등록하는 어노테이션들
 
-| 어노테이션 | 용도 | 예시 |
-|-----------|------|------|
-| `@Component` | 일반적인 빈 등록 | 유틸리티 클래스 등 |
-| `@Controller` / `@RestController` | 웹 요청을 처리하는 클래스 | PostController |
-| `@Service` | 비즈니스 로직을 담당하는 클래스 | PostService |
-| `@Repository` | 데이터 접근을 담당하는 클래스 | PostRepository |
+| 어노테이션                             | 용도                | 예시             |
+|-----------------------------------|-------------------|----------------|
+| `@Component`                      | 일반적인 빈 등록         | 유틸리티 클래스 등     |
+| `@Controller` / `@RestController` | 웹 요청을 처리하는 클래스    | PostController |
+| `@Service`                        | 비즈니스 로직을 담당하는 클래스 | PostService    |
+| `@Repository`                     | 데이터 접근을 담당하는 클래스  | PostRepository |
 
 이 네 가지는 사실 기능적으로 거의 동일합니다. `@Service`, `@Repository`는 `@Component`의 특수한 형태입니다.
 하지만 **역할을 명확히 구분**하기 위해 다르게 씁니다.
@@ -265,16 +272,17 @@ CommentController가 PostService를 요청 → 같은 PostService 빈을 줌
 
 ## 7. 핵심 정리
 
-| 개념 | 한 줄 요약 |
-|------|-----------|
-| **의존성** | A 클래스가 B 클래스 없이 동작할 수 없는 관계 |
-| **IoC** | 객체 생성/관리의 제어권을 프레임워크에 넘기는 것 |
-| **DI** | IoC를 구현하는 방법 — 필요한 객체를 외부에서 주입받는 것 |
-| **빈** | 스프링이 만들고 관리하는 객체 |
-| **싱글톤** | 빈은 기본적으로 하나만 만들어져서 공유됨 |
-| **생성자 주입** | DI의 권장 방식 — 생성자 매개변수로 의존성을 받는 것 |
+| 개념         | 한 줄 요약                             |
+|------------|------------------------------------|
+| **의존성**    | A 클래스가 B 클래스 없이 동작할 수 없는 관계        |
+| **IoC**    | 객체 생성/관리의 제어권을 프레임워크에 넘기는 것        |
+| **DI**     | IoC를 구현하는 방법 — 필요한 객체를 외부에서 주입받는 것 |
+| **빈**      | 스프링이 만들고 관리하는 객체                   |
+| **싱글톤**    | 빈은 기본적으로 하나만 만들어져서 공유됨             |
+| **생성자 주입** | DI의 권장 방식 — 생성자 매개변수로 의존성을 받는 것    |
 
 ---
 
 ## 다음 주제
+
 이 개념들을 이해한 후, 다음으로 **스프링 부트 프로젝트 구조와 REST API의 기본**을 학습합니다.

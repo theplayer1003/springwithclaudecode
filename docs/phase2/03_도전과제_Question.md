@@ -17,11 +17,11 @@ IDE가 보여준 목록은 "이미 완성된 메서드"가 아니라, 규칙에 
 
 ## Q2: @PathVariable과 @RequestParam의 차이
 
-| | @PathVariable | @RequestParam |
-|---|---|---|
-| 위치 | URL 경로 안 | URL 끝의 `?` 뒤 |
-| 예시 URL | `/posts/1` | `/posts/search?keyword=스프링` |
-| 용도 | 특정 리소스를 식별할 때 | 필터, 검색, 옵션을 전달할 때 |
+|        | @PathVariable | @RequestParam               |
+|--------|---------------|-----------------------------|
+| 위치     | URL 경로 안      | URL 끝의 `?` 뒤                |
+| 예시 URL | `/posts/1`    | `/posts/search?keyword=스프링` |
+| 용도     | 특정 리소스를 식별할 때 | 필터, 검색, 옵션을 전달할 때           |
 
 - "어떤 것"을 지정 → PathVariable: `/posts/1`, `/users/hong`
 - "어떻게" 필터/검색 → RequestParam: `/posts/search?keyword=스프링`, `/posts?page=2&size=10`
