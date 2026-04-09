@@ -9,5 +9,6 @@
 3. **안전성** — 실수로 Entity를 수정해도 DB에 반영되지 않음
 
 규칙:
+
 - 쓰기(create/update/delete) → `@Transactional`
 - 읽기(get/search) → `@Transactional(readOnly = true)`

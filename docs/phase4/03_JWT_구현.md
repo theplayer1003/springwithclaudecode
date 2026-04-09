@@ -18,6 +18,7 @@ runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 - `jjwt-jackson` — JWT의 JSON 처리를 Jackson으로 수행 (런타임에만 필요)
 
 `implementation`과 `runtimeOnly`의 차이:
+
 - `implementation` — 컴파일 시점 + 런타임 모두 필요 (코드에서 직접 import)
 - `runtimeOnly` — 런타임에만 필요 (코드에서 직접 사용하지 않지만 실행 시 필요)
 
@@ -30,6 +31,7 @@ JWT 토큰의 생성, 검증, 정보 추출을 담당하는 클래스입니다.
 ### 토큰 생성
 
 ```java
+
 @Component
 public class JwtTokenProvider {
 
@@ -69,6 +71,7 @@ jwt.expiration=3600000   # 1시간 (밀리초)
 ```
 
 비밀키를 코드에 직접 쓰지 않고 설정 파일에서 읽는 이유:
+
 - 환경(dev/prod)별로 다른 키를 사용할 수 있음
 - 코드가 공개되어도 비밀키가 노출되지 않음 (설정 파일은 .gitignore로 제외 가능)
 
@@ -96,6 +99,7 @@ private Claims getClaims(String token) {
 ```
 
 `parseSignedClaims`는 두 가지를 동시에 수행합니다:
+
 1. 서명 검증 — 토큰이 위변조되지 않았는지 확인
 2. 만료 확인 — 토큰이 만료되었으면 예외 발생
 
@@ -119,6 +123,7 @@ public boolean validateToken(String token) {
 클라이언트가 보낸 JWT 토큰을 검증하고, 인증 정보를 SecurityContext에 설정하는 필터입니다.
 
 ```java
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -128,8 +133,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                     HttpServletResponse response,
-                                     FilterChain filterChain) throws ServletException, IOException {
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         // 1. 요청 헤더에서 토큰 추출
         String token = resolveToken(request);
@@ -141,11 +146,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 3. Authentication 객체 생성
             UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                    username,                                    // principal
-                    null,                                        // credentials (토큰 인증이므로 null)
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role))  // 권한
-                );
+                    new UsernamePasswordAuthenticationToken(
+                            username,                                    // principal
+                            null,                                        // credentials (토큰 인증이므로 null)
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role))  // 권한
+                    );
 
             // 4. SecurityContext에 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -199,6 +204,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWI...
 ## 4. SecurityConfig에 JWT 필터 등록
 
 ```java
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -210,17 +216,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
-            .addFilterBefore(jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -232,18 +238,19 @@ public class SecurityConfig {
 }
 ```
 
-`addFilterBefore`는 기존 필터 체인의 특정 위치 앞에 우리의 커스텀 필터를 삽입합니다. Spring Security의 기본 인증 필터(`UsernamePasswordAuthenticationFilter`)보다 먼저 JWT 검증을 수행하도록 합니다.
+`addFilterBefore`는 기존 필터 체인의 특정 위치 앞에 우리의 커스텀 필터를 삽입합니다. Spring Security의 기본 인증 필터(
+`UsernamePasswordAuthenticationFilter`)보다 먼저 JWT 검증을 수행하도록 합니다.
 
 ---
 
 ## 5. 핵심 정리
 
-| 구성 요소 | 역할 |
-|----------|------|
-| **JwtTokenProvider** | 토큰 생성, 검증, 정보 추출. 비밀키 관리 |
-| **JwtAuthenticationFilter** | 매 요청마다 토큰을 검증하고 SecurityContext에 인증 정보 설정 |
-| **SecurityConfig** | URL별 접근 규칙 정의, JWT 필터 등록, PasswordEncoder 빈 등록 |
-| **application.properties** | 비밀키, 만료 시간 등 보안 설정값 외부화 |
+| 구성 요소                       | 역할                                             |
+|-----------------------------|------------------------------------------------|
+| **JwtTokenProvider**        | 토큰 생성, 검증, 정보 추출. 비밀키 관리                       |
+| **JwtAuthenticationFilter** | 매 요청마다 토큰을 검증하고 SecurityContext에 인증 정보 설정      |
+| **SecurityConfig**          | URL별 접근 규칙 정의, JWT 필터 등록, PasswordEncoder 빈 등록 |
+| **application.properties**  | 비밀키, 만료 시간 등 보안 설정값 외부화                        |
 
 ---
 

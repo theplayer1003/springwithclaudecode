@@ -7,6 +7,7 @@
 억지로 하려면 `Object`를 반환하거나 모든 Controller 메서드마다 에러 처리 로직을 반복해야 한다.
 
 예외를 던지면 이 문제가 해결된다:
+
 - **Service** — "못 찾았다"는 사실을 예외로 던지기만 함. HTTP 응답 형식을 전혀 모름.
 - **GlobalExceptionHandler** — 예외를 가로채서 ErrorResponse(DTO)로 변환하여 응답.
 

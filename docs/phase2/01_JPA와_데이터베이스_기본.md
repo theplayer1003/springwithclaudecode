@@ -308,6 +308,7 @@ post.setTitle("수정된 제목");  // setter만 호출
 ### 스프링에서의 트랜잭션
 
 ```java
+
 @Service
 public class PostService {
 

@@ -27,10 +27,33 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @PrePersist
-    public void onCreate() {
-        if (this.role == null) {
-            this.role = Role.USER;
-        }
+    protected Member() {
+    }
+
+    public Member(String username, String password, String email) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.role = Role.USER;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public Role getRole() {
+        return role;
     }
 }
