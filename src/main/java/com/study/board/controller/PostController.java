@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,8 +31,9 @@ public class PostController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<PostResponse> createPost(@Valid @RequestBody PostCreateRequest request) {
-        PostResponse post = postService.createPost(request);
+    public ResponseEntity<PostResponse> createPost(@Valid @RequestBody PostCreateRequest request,
+                                                   @AuthenticationPrincipal String username) {
+        PostResponse post = postService.createPost(request, username);
         return ResponseEntity.status(HttpStatus.CREATED).body(post);
     }
 
@@ -52,15 +54,17 @@ public class PostController {
     // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<PostResponse> updatePost(@PathVariable Long id,
-                                                   @Valid @RequestBody PostUpdateRequest request) {
-        PostResponse postResponse = postService.updatePost(id, request);
+                                                   @Valid @RequestBody PostUpdateRequest request,
+                                                   @AuthenticationPrincipal String username) {
+        PostResponse postResponse = postService.updatePost(id, request, username);
         return ResponseEntity.ok(postResponse);
     }
 
     // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
+    public ResponseEntity<Void> deletePost(@PathVariable Long id,
+                                           @AuthenticationPrincipal String username) {
+        postService.deletePost(id, username);
         return ResponseEntity.noContent().build();
     }
 
