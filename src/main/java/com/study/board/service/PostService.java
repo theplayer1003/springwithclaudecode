@@ -74,6 +74,15 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
+    @Transactional
+    public void deletePostForced(Long id) {
+        if (!postRepository.existsById(id)) {
+            throw new ResourceNotFoundException(id + " 게시글을 찾을 수 없습니다.");
+        }
+
+        postRepository.deleteById(id);
+    }
+
     @Transactional(readOnly = true)
     public List<PostResponse> searchPosts(String keyword) {
         return postRepository.findByTitleContaining(keyword).stream()

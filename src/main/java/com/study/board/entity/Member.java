@@ -36,6 +36,13 @@ public class Member {
         this.role = Role.USER;
     }
 
+    public Member(String username, String password, String email, Role role) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.role = role;
+    }
+
     public Long getId() {
         return id;
     }

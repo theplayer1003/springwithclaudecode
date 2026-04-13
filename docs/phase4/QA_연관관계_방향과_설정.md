@@ -22,11 +22,12 @@
 
 FK를 실제로 관리하는 쪽이다.
 
-| 파라미터 | 의미 | 기본값 | 판단 기준 |
-|---------|------|-------|----------|
+| 파라미터    | 의미              | 기본값     | 판단 기준                |
+|---------|-----------------|---------|----------------------|
 | `fetch` | 연관 엔티티를 언제 로딩할지 | `EAGER` | 거의 항상 `LAZY`로 변경해야 함 |
 
 ```java
+
 @ManyToOne(fetch = FetchType.LAZY)
 @JoinColumn(name = "member_id")  // FK 컬럼명 지정
 private Member member;
@@ -38,14 +39,15 @@ private Member member;
 
 양방향일 때만 사용하며, `mappedBy`로 읽기 전용임을 선언한다.
 
-| 파라미터 | 의미 | 기본값 | 판단 기준 |
-|---------|------|-------|----------|
-| `mappedBy` | FK 주인 쪽 필드명 | 없음 (필수) | 양방향이면 반드시 지정 |
-| `fetch` | 연관 엔티티를 언제 로딩할지 | `LAZY` | 기본값이 LAZY이므로 보통 그대로 둠 |
-| `cascade` | 부모 작업을 자식에 전파할지 | 없음 | 생명주기 종속 여부로 판단 |
-| `orphanRemoval` | 컬렉션에서 제거된 자식을 DB에서 삭제할지 | `false` | 생명주기 종속 여부로 판단 |
+| 파라미터            | 의미                      | 기본값     | 판단 기준                 |
+|-----------------|-------------------------|---------|-----------------------|
+| `mappedBy`      | FK 주인 쪽 필드명             | 없음 (필수) | 양방향이면 반드시 지정          |
+| `fetch`         | 연관 엔티티를 언제 로딩할지         | `LAZY`  | 기본값이 LAZY이므로 보통 그대로 둠 |
+| `cascade`       | 부모 작업을 자식에 전파할지         | 없음      | 생명주기 종속 여부로 판단        |
+| `orphanRemoval` | 컬렉션에서 제거된 자식을 DB에서 삭제할지 | `false` | 생명주기 종속 여부로 판단        |
 
 ```java
+
 @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 private List<Comment> comments = new ArrayList<>();
 ```
@@ -72,6 +74,7 @@ List<Post> posts = postRepository.findByMemberId(memberId, pageable);  // 필요
 ```
 
 방법 1의 문제점:
+
 - 회원의 게시글이 1000개면 1000개 전부 로딩
 - 페이징 불가
 - 실제로 필요한 건 게시글 제목과 주소 정도인데, 엔티티 전체를 가져옴
@@ -115,10 +118,10 @@ posts(N쪽)에 member_id를 넣으면:
 
 **A:** "부모 없이 자식이 존재할 수 있는가?"로 판단한다.
 
-| 관계 | 부모 없이 존재 가능? | cascade | orphanRemoval |
-|-----|-------------------|---------|---------------|
-| Post → Comment | 댓글은 게시글 없이 의미 없음 | `ALL` | `true` |
-| Member → Post | 게시글은 회원 탈퇴 후에도 남을 수 있음 | 없음 | `false` |
+| 관계             | 부모 없이 존재 가능?           | cascade | orphanRemoval |
+|----------------|------------------------|---------|---------------|
+| Post → Comment | 댓글은 게시글 없이 의미 없음       | `ALL`   | `true`        |
+| Member → Post  | 게시글은 회원 탈퇴 후에도 남을 수 있음 | 없음      | `false`       |
 
 - `cascade = ALL`: 부모 저장 → 자식도 저장, 부모 삭제 → 자식도 삭제
 - `orphanRemoval = true`: 컬렉션에서 제거된 자식을 DB에서도 삭제
@@ -129,9 +132,11 @@ posts(N쪽)에 member_id를 넣으면:
 
 ## Q. @ManyToOne의 fetch 기본값은 왜 LAZY로 바꿔야 하나?
 
-**A:** `@ManyToOne`의 기본 fetch 전략은 `EAGER`(즉시 로딩)다. 게시글을 조회할 때마다 항상 회원 정보도 JOIN해서 가져온다. 회원 정보가 필요 없는 조회에서도 불필요한 쿼리가 발생하므로, `LAZY`로 설정해서 실제로 접근할 때만 로딩하도록 바꾸는 것이 권장된다.
+**A:** `@ManyToOne`의 기본 fetch 전략은 `EAGER`(즉시 로딩)다. 게시글을 조회할 때마다 항상 회원 정보도 JOIN해서 가져온다. 회원 정보가 필요 없는 조회에서도 불필요한 쿼리가
+발생하므로, `LAZY`로 설정해서 실제로 접근할 때만 로딩하도록 바꾸는 것이 권장된다.
 
 ```java
+
 @ManyToOne(fetch = FetchType.LAZY)
 @JoinColumn(name = "member_id")
 private Member member;
