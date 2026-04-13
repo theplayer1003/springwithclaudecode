@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,8 +32,9 @@ public class CommentController {
     // POST /posts/1/comments
     @PostMapping
     public ResponseEntity<CommentResponse> createComment(@PathVariable Long postId,
-                                                         @Valid @RequestBody CommentCreateRequest request) {
-        CommentResponse comment = commentService.createComment(postId, request);
+                                                         @Valid @RequestBody CommentCreateRequest request,
+                                                         @AuthenticationPrincipal String username) {
+        CommentResponse comment = commentService.createComment(postId, request, username);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
@@ -59,8 +61,9 @@ public class CommentController {
     @PutMapping("/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(@PathVariable Long postId,
                                                          @PathVariable Long commentId,
-                                                         @Valid @RequestBody CommentUpdateRequest request) {
-        CommentResponse commentResponse = commentService.updateComment(postId, commentId, request);
+                                                         @Valid @RequestBody CommentUpdateRequest request,
+                                                         @AuthenticationPrincipal String username) {
+        CommentResponse commentResponse = commentService.updateComment(postId, commentId, request, username);
         return ResponseEntity.ok(commentResponse);
     }
 
@@ -68,8 +71,9 @@ public class CommentController {
     // DELETE /posts/1/comments/1
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long postId,
-                                              @PathVariable Long commentId) {
-        commentService.deleteComment(postId, commentId);
+                                              @PathVariable Long commentId,
+                                              @AuthenticationPrincipal String username) {
+        commentService.deleteComment(postId, commentId, username);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,6 +1,5 @@
 package com.study.board.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -17,42 +16,34 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String author;
-
     private String content;
 
     private LocalDateTime createdAt;
 
-    // 다대일 관계: 댓글(N) : 게시글(1)
-    // 이 쪽이 관계의 주인 → 외래키(post_id)를 관리
-    // fetch = LAZY → 댓글을 조회할 때 게시글을 즉시 가져오지 않음
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")  // DB에 생성될 외래키 컬럼 이름
-    @JsonIgnore  // JSON 응답에 post 객체를 포함하지 않음 (무한 순환 방지)
+    @JoinColumn(name = "post_id")
     private Post post;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     protected Comment() {
     }
 
-    public Comment(String author, String content, Post post) {
-        this.author = author;
+    public Comment(String content, Post post, Member member) {
         this.content = content;
-        this.post = post;
         this.createdAt = LocalDateTime.now();
+        this.post = post;
+        this.member = member;
     }
-
-    // --- getter / setter ---
 
     public Long getId() {
         return id;
     }
 
     public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
+        return member.getUsername();
     }
 
     public String getContent() {

@@ -1,6 +1,7 @@
 package com.study.board.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -56,6 +57,8 @@ public class JwtTokenProvider {
         try {
             getClaims(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            throw e;
         } catch (JwtException e) {
             return false;
         }
