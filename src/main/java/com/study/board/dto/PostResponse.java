@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 public record PostResponse(
         Long id,
+        String author,
         String title,
         String content,
         LocalDateTime createdAt,
@@ -12,6 +13,7 @@ public record PostResponse(
         Integer commentsCount) {
     public static PostResponse from(Post post) {
         return new PostResponse(post.getId(),
+                post.getAuthor(),
                 post.getTitle(),
                 post.getContent(),
                 post.getCreatedAt(),

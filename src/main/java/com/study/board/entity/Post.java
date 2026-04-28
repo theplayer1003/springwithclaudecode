@@ -2,9 +2,12 @@ package com.study.board.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -34,13 +37,18 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     // JPA는 기본 생성자가 필수. protected로 외부 직접 사용을 제한
     protected Post() {
     }
 
-    public Post(String title, String content) {
+    public Post(String title, String content, Member member) {
         this.title = title;
         this.content = content;
+        this.member = member;
     }
 
     @PreUpdate
@@ -90,5 +98,9 @@ public class Post {
 
     public Integer getCommentsCount() {
         return comments.size();
+    }
+
+    public String getAuthor() {
+        return member.getUsername();
     }
 }
