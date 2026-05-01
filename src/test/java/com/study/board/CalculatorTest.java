@@ -8,6 +8,18 @@ import org.junit.jupiter.api.Test;
 
 class CalculatorTest {
 
+    private static int division(int dividend, int divisor) {
+        return dividend / divisor;
+    }
+
+    private static int plus(int a, int b) {
+        return a + b;
+    }
+
+    private static int minus(int a, int b) {
+        return a - b;
+    }
+
     @Test
     void division_DividedZero_ThrowsArithmeticException() {
         assertThatThrownBy(() -> division(10, 0))
@@ -22,17 +34,5 @@ class CalculatorTest {
     @Test
     void minus_TenMinusFour_ReturnSix() {
         assertThat(minus(10, 4)).isEqualTo(6);
-    }
-
-    private static int division(int dividend, int divisor) {
-        return dividend / divisor;
-    }
-
-    private static int plus(int a, int b) {
-        return a + b;
-    }
-
-    private static int minus(int a, int b) {
-        return a - b;
     }
 }

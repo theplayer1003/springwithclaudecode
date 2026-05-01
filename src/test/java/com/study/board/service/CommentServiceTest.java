@@ -177,9 +177,9 @@ class CommentServiceTest {
         commentService.deleteComment(1L, 1L, "dummy");
         verify(commentRepository).delete(comment);
     }
-    
+
     @Test
-    void deleteComment_ByNonAuthor_ThrowsUnauthorizedAccessException(){
+    void deleteComment_ByNonAuthor_ThrowsUnauthorizedAccessException() {
         ReflectionTestUtils.setField(post, "id", 1L);
         ReflectionTestUtils.setField(comment, "id", 1L);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
@@ -190,22 +190,22 @@ class CommentServiceTest {
     }
 
     @Test
-    void deleteComment_NonExistingComment_ThrowsResourceNotFoundException(){
+    void deleteComment_NonExistingComment_ThrowsResourceNotFoundException() {
         assertThatThrownBy(() -> commentService.deleteComment(1L, 1L, "username"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(" 댓글을 찾을 수 없습니다.");
     }
 
     @Test
-    void deleteCommentForced_ValidRequest_DeletesComment(){
+    void deleteCommentForced_ValidRequest_DeletesComment() {
         when(commentRepository.existsById(1L)).thenReturn(true);
 
         commentService.deleteCommentForced(1L);
         verify(commentRepository).deleteById(1L);
     }
-    
+
     @Test
-    void deleteCommentForced_NonExistingComment_ThrowsResourceNotFoundException(){
+    void deleteCommentForced_NonExistingComment_ThrowsResourceNotFoundException() {
         when(commentRepository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> commentService.deleteCommentForced(1L))

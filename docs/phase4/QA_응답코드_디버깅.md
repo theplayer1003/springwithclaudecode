@@ -18,7 +18,8 @@ Controller에 도달하기 전에 Security에서 차단되면, Controller가 반
 
 **A:** Spring Security는 기본적으로 인증 실패도 403으로 반환한다. `AuthenticationEntryPoint`를 설정하면 401과 403을 구분할 수 있다.
 
-그러나 `AuthenticationEntryPoint`만 설정하면 **인가 실패(권한 부족)도 401로 반환**되는 문제가 발생한다. `AccessDeniedHandler`도 함께 설정해야 401과 403이 정확히 구분된다.
+그러나 `AuthenticationEntryPoint`만 설정하면 **인가 실패(권한 부족)도 401로 반환**되는 문제가 발생한다. `AccessDeniedHandler`도 함께 설정해야 401과 403이 정확히
+구분된다.
 
 ```java
 .exceptionHandling(exception -> exception
@@ -35,17 +36,17 @@ Controller에 도달하기 전에 Security에서 차단되면, Controller가 반
 )
 ```
 
-| 핸들러 | 역할 | 반환 코드 |
-|--------|------|---------|
-| `AuthenticationEntryPoint` | 인증 실패 (토큰 없음, 만료) | 401 |
-| `AccessDeniedHandler` | 인가 실패 (권한 부족) | 403 |
+| 핸들러                        | 역할                | 반환 코드 |
+|----------------------------|-------------------|-------|
+| `AuthenticationEntryPoint` | 인증 실패 (토큰 없음, 만료) | 401   |
+| `AccessDeniedHandler`      | 인가 실패 (권한 부족)     | 403   |
 
 설정 후 응답 구분:
 
-| 상황 | 반환 코드 | 의미 |
-|------|---------|------|
-| 토큰 없이 요청 | **401** | 인증 안 됨 |
-| USER 토큰으로 /admin 접근 | **403** | 권한 부족 |
+| 상황                  | 반환 코드   | 의미     |
+|---------------------|---------|--------|
+| 토큰 없이 요청            | **401** | 인증 안 됨 |
+| USER 토큰으로 /admin 접근 | **403** | 권한 부족  |
 
 ---
 
@@ -77,13 +78,13 @@ ADMIN 토큰 + GET /admin/posts/1
 
 ## Q. 정리: 관리자 강제 삭제 엔드포인트의 응답 코드 전체 (테스트 검증 완료)
 
-| 상황 | 기대 코드 | 실제 코드 | 정상? | 비고 |
-|------|---------|---------|------|------|
-| ADMIN 토큰 + DELETE + 존재하는 게시글 | 204 | 204 | O | |
-| ADMIN 토큰 + DELETE + 없는 게시글 | 404 | 404 | O | |
-| ADMIN 토큰 + 잘못된 메서드 (GET) | 405 | 401 | 허용 | Security가 먼저 처리, 보안상 허용 범위 |
-| USER 토큰 + 어떤 메서드든 | 403 | 403 | O | AccessDeniedHandler 추가 후 정상 |
-| 토큰 없음 + 어떤 메서드든 | 401 | 401 | O | AuthenticationEntryPoint로 처리 |
+| 상황                           | 기대 코드 | 실제 코드 | 정상? | 비고                           |
+|------------------------------|-------|-------|-----|------------------------------|
+| ADMIN 토큰 + DELETE + 존재하는 게시글 | 204   | 204   | O   |                              |
+| ADMIN 토큰 + DELETE + 없는 게시글   | 404   | 404   | O   |                              |
+| ADMIN 토큰 + 잘못된 메서드 (GET)     | 405   | 401   | 허용  | Security가 먼저 처리, 보안상 허용 범위   |
+| USER 토큰 + 어떤 메서드든            | 403   | 403   | O   | AccessDeniedHandler 추가 후 정상  |
+| 토큰 없음 + 어떤 메서드든              | 401   | 401   | O   | AuthenticationEntryPoint로 처리 |
 
 ---
 

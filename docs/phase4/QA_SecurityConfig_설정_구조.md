@@ -32,11 +32,27 @@ http
 
 ```java
 // 올바른 예: 한 번에 모아서
-.authorizeHttpRequests(auth -> auth
-    .requestMatchers("/h2-console/**").permitAll()
-    .requestMatchers("/auth/**").permitAll()
-    .requestMatchers(HttpMethod.GET, "/posts", "/posts/**").permitAll()
-    .anyRequest().authenticated()
+.authorizeHttpRequests(auth ->auth
+        .
+
+requestMatchers("/h2-console/**").
+
+permitAll()
+    .
+
+requestMatchers("/auth/**").
+
+permitAll()
+    .
+
+requestMatchers(HttpMethod.GET, "/posts","/posts/**").
+
+permitAll()
+    .
+
+anyRequest().
+
+authenticated()
 )
 ```
 
@@ -47,11 +63,27 @@ http
 **A:** 중요하다. Spring Security는 **위에서부터 순서대로 매칭**한다. 먼저 매칭되는 규칙이 적용된다.
 
 ```java
-.authorizeHttpRequests(auth -> auth
-    .requestMatchers("/h2-console/**").permitAll()              // 1. 먼저 체크
-    .requestMatchers("/auth/**").permitAll()                    // 2. 그 다음
-    .requestMatchers(HttpMethod.GET, "/posts", "/posts/**").permitAll()  // 3. 그 다음
-    .anyRequest().authenticated()                              // 4. 위에서 안 걸리면 여기
+.authorizeHttpRequests(auth ->auth
+        .
+
+requestMatchers("/h2-console/**").
+
+permitAll()              // 1. 먼저 체크
+    .
+
+requestMatchers("/auth/**").
+
+permitAll()                    // 2. 그 다음
+    .
+
+requestMatchers(HttpMethod.GET, "/posts","/posts/**").
+
+permitAll()  // 3. 그 다음
+    .
+
+anyRequest().
+
+authenticated()                              // 4. 위에서 안 걸리면 여기
 )
 ```
 

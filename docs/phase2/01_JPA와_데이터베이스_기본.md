@@ -36,16 +36,23 @@ posts 테이블
 
 ```sql
 -- 게시글 조회
-SELECT * FROM posts WHERE id = 1;
+SELECT *
+FROM posts
+WHERE id = 1;
 
 -- 게시글 생성
-INSERT INTO posts (title, content, created_at) VALUES ('제목', '내용', NOW());
+INSERT INTO posts (title, content, created_at)
+VALUES ('제목', '내용', NOW());
 
 -- 게시글 수정
-UPDATE posts SET title = '수정된 제목' WHERE id = 1;
+UPDATE posts
+SET title = '수정된 제목'
+WHERE id = 1;
 
 -- 게시글 삭제
-DELETE FROM posts WHERE id = 1;
+DELETE
+FROM posts
+WHERE id = 1;
 ```
 
 자바 코드에서 이런 SQL을 직접 작성해서 DB에 보낼 수 있습니다.
@@ -62,16 +69,31 @@ DELETE FROM posts WHERE id = 1;
 ```java
 String sql = "SELECT * FROM posts WHERE id = ?";
 PreparedStatement stmt = connection.prepareStatement(sql);
-stmt.setLong(1, id);
+stmt.
+
+setLong(1,id);
+
 ResultSet rs = stmt.executeQuery();
 
-if (rs.next()) {
-    Post post = new Post();
-    post.setId(rs.getLong("id"));
-    post.setTitle(rs.getString("title"));
-    post.setContent(rs.getString("content"));
-    post.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-}
+if(rs.
+
+next()){
+Post post = new Post();
+    post.
+
+setId(rs.getLong("id"));
+        post.
+
+setTitle(rs.getString("title"));
+        post.
+
+setContent(rs.getString("content"));
+        post.
+
+setCreatedAt(rs.getTimestamp("created_at").
+
+toLocalDateTime());
+        }
 ```
 
 단순히 게시글 하나를 조회하는데 이만큼의 코드가 필요합니다. 컬럼이 추가되면? 모든 SQL과 매핑 코드를 수정해야 합니다.

@@ -52,10 +52,22 @@ filterChain.doFilter(request, response);                       // 6. 다음 필�
 마지막쯤에 위치한다.
 
 ```java
-.authorizeHttpRequests(auth -> auth
-    .requestMatchers("/auth/**").permitAll()
-    .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
-    .anyRequest().authenticated()  // 나머지는 인증 필요
+.authorizeHttpRequests(auth ->auth
+        .
+
+requestMatchers("/auth/**").
+
+permitAll()
+    .
+
+requestMatchers(HttpMethod.GET, "/posts/**").
+
+permitAll()
+    .
+
+anyRequest().
+
+authenticated()  // 나머지는 인증 필요
 )
 ```
 
