@@ -291,12 +291,12 @@ Filter 와 인가 규칙 자체는 통과됩니다.
 @AuthenticationPrincipal SecurityContext 에 등록된 인가 정보 중 Principal 필드의 값을 가져옵니다.
 
 3.
+
 `if (!username.equals(post.getAuthor())) {
 throw new UnauthorizedAccessException("게시글을 수정할 권한이 없습니다");
 }`
 해당 코드 부분으로 인증된 username 과 게시글의 getAuthor() 메서드가 일치하는지 검사해 불일치 시 예외를 던집니다.
 getAuthor 메서드는 post 가 가지고 있는 Member 클래스의 useranme 을 반환합니다.
-
 
 4.
 

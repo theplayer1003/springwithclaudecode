@@ -5,7 +5,6 @@ import com.study.board.dto.PostResponse;
 import com.study.board.dto.PostUpdateRequest;
 import com.study.board.service.PostService;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

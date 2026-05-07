@@ -9,7 +9,6 @@ import com.study.board.exception.ResourceNotFoundException;
 import com.study.board.exception.UnauthorizedAccessException;
 import com.study.board.repository.MemberRepository;
 import com.study.board.repository.PostRepository;
-import java.util.List;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;

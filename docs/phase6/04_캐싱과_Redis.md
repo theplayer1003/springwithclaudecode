@@ -14,8 +14,9 @@ CPU 캐시:     디스크 → RAM → CPU 캐시 (자주 쓰는 데이터를 가
 ### @Cacheable — 캐시 저장
 
 ```java
+
 @Cacheable("posts")
-public PostResponse getPost(Long id) { ... }
+public PostResponse getPost(Long id) { ...}
 ```
 
 - 첫 번째 호출: 캐시에 없음 → DB 조회 → 결과를 캐시에 저장 → 반환
@@ -26,8 +27,9 @@ public PostResponse getPost(Long id) { ... }
 ### @CacheEvict — 캐시 제거
 
 ```java
+
 @CacheEvict(value = "posts", key = "#id")
-public PostResponse updatePost(Long id, PostUpdateRequest request, String username) { ... }
+public PostResponse updatePost(Long id, PostUpdateRequest request, String username) { ...}
 ```
 
 데이터가 수정/삭제될 때 해당 캐시를 즉시 제거한다. 다음 조회 시 DB에서 새 데이터를 가져와 다시 캐싱한다.
@@ -158,6 +160,7 @@ spring.cache.redis.time-to-live=1800000
 Redis는 외부 저장소이므로 Java 객체를 JSON으로 변환(직렬화)해서 저장해야 한다.
 
 ```java
+
 @Configuration
 public class CacheConfig {
 
