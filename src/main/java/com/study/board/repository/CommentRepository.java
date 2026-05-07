@@ -2,11 +2,14 @@ package com.study.board.repository;
 
 import com.study.board.entity.Comment;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    // 쿼리 메서드: 특정 게시글의 댓글 목록 조회
-    // → SELECT * FROM comment WHERE post_id = ? 자동 생성
-    List<Comment> findByPostId(Long postId);
+    @Query("SELECT c FROM Comment c JOIN FETCH c.member WHERE c.post.id = :postId")
+    Page<Comment> findByPostIdWithMember(@Param("postId") Long postId, Pageable pageable);
 }

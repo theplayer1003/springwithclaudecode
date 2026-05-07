@@ -1,5 +1,6 @@
 package com.study.board.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,6 +20,9 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -59,24 +63,29 @@ class PostControllerTest {
 
     @Test
     void getAllPosts_ReturnsPostList() throws Exception {
-        when(postService.getAllPosts()).thenReturn(List.of(
+        List<PostResponse> responses = List.of(
                 PostResponse.from(new Post("dummy", "dummy", new Member("dummy",
                         "dummy",
-                        "dummy")))
-        ));
+                        "dummy"))));
+
+        when(postService.getAllPosts(any(Pageable.class))).thenReturn(
+                new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
         mockMvc.perform(get("/posts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].title").value("dummy"));
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("dummy"));
     }
 
     @Test
     void getAllPosts_NoPosts_ReturnsEmptyList() throws Exception {
-        when(postService.getAllPosts()).thenReturn(List.of());
+        List<PostResponse> responses = List.of();
+
+        when(postService.getAllPosts(any(Pageable.class))).thenReturn(
+                new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
         mockMvc.perform(get("/posts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content.length()").value(0));
     }
 }

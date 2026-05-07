@@ -11,7 +11,11 @@ import com.study.board.exception.UnauthorizedAccessException;
 import com.study.board.repository.CommentRepository;
 import com.study.board.repository.MemberRepository;
 import com.study.board.repository.PostRepository;
-import java.util.List;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +24,17 @@ public class CommentService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
+    private final CacheManager cacheManager;
 
     public CommentService(PostRepository postRepository, CommentRepository commentRepository,
-                          MemberRepository memberRepository) {
+                          MemberRepository memberRepository, CacheManager cacheManager) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.memberRepository = memberRepository;
+        this.cacheManager = cacheManager;
     }
 
+    @CacheEvict(value = "posts", key = "#postId")
     @Transactional
     public CommentResponse createComment(Long postId, CommentCreateRequest request, String username) {
         Post post = findPostOrThrow(postId);
@@ -41,14 +48,13 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponse> getComments(Long postId) {
+    public Page<CommentResponse> getComments(Long postId, Pageable pageable) {
         if (!postRepository.existsById(postId)) {
             throw new ResourceNotFoundException(postId + " 게시글을 찾을 수 없습니다.");
         }
 
-        return commentRepository.findByPostId(postId).stream()
-                .map(CommentResponse::from)
-                .toList();
+        return commentRepository.findByPostIdWithMember(postId, pageable)
+                .map(CommentResponse::from);
     }
 
     @Transactional(readOnly = true)
@@ -59,6 +65,7 @@ public class CommentService {
         return CommentResponse.from(comment);
     }
 
+    @CacheEvict(value = "posts", key = "#postId")
     @Transactional
     public CommentResponse updateComment(Long postId, Long commentId, CommentUpdateRequest request, String username) {
         Comment comment = findCommentOrThrow(commentId);
@@ -73,6 +80,7 @@ public class CommentService {
         return CommentResponse.from(comment);
     }
 
+    @CacheEvict(value = "posts", key = "#postId")
     @Transactional
     public void deleteComment(Long postId, Long commentId, String username) {
         Comment comment = findCommentOrThrow(commentId);
@@ -87,11 +95,12 @@ public class CommentService {
 
     @Transactional
     public void deleteCommentForced(Long commentId) {
-        if (!commentRepository.existsById(commentId)) {
-            throw new ResourceNotFoundException(commentId + " 댓글을 찾을 수 없습니다.");
-        }
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException(commentId + " 댓글을 찾을 수 없습니다."));
+        Long postId = comment.getPost().getId();
 
-        commentRepository.deleteById(commentId);
+        commentRepository.delete(comment);
+        cacheManager.getCache("posts").evict(postId);
     }
 
     private Post findPostOrThrow(Long postId) {
