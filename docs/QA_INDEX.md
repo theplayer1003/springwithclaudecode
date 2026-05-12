@@ -58,3 +58,11 @@
 
 - [ReflectionTestUtils와 Reflection](phase5/QA_ReflectionTestUtils.md) — 단위 테스트에서 private 필드 설정, Reflection 동작 원리
 - [@MockBean deprecated와 @MockitoBean](phase5/QA_MockBean_deprecated.md) — deprecated 개념, @MockBean → @MockitoBean 전환 이유
+
+## Spring 동작 메커니즘
+
+- [AOP와 프록시 메커니즘](phase7/QA_AOP_프록시_메커니즘.md) — @Transactional/@Cacheable/@PreAuthorize/@Async 공통 메커니즘, 자기 호출 문제, private/final 제약
+
+## 비동기 / 동시성
+
+- [스레드 풀 vs 커넥션 풀](phase7/QA_스레드풀_vs_커넥션풀.md) — 풀링 패턴, 재사용 자원 차이, 풀 가득 찼을 때 동작(대기 vs 거부 정책)
