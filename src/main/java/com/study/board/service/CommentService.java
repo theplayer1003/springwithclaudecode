@@ -11,6 +11,7 @@ import com.study.board.exception.UnauthorizedAccessException;
 import com.study.board.repository.CommentRepository;
 import com.study.board.repository.MemberRepository;
 import com.study.board.repository.PostRepository;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -99,7 +100,10 @@ public class CommentService {
         Long postId = comment.getPost().getId();
 
         commentRepository.delete(comment);
-        cacheManager.getCache("posts").evict(postId);
+        Cache cache = cacheManager.getCache("posts");
+        if (cache != null) {
+            cache.evict(postId);
+        }
     }
 
     private Post findPostOrThrow(Long postId) {
