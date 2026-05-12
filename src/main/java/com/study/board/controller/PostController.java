@@ -5,7 +5,8 @@ import com.study.board.dto.PostResponse;
 import com.study.board.dto.PostUpdateRequest;
 import com.study.board.service.PostService;
 import jakarta.validation.Valid;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,9 +40,8 @@ public class PostController {
 
     // READ — 목록
     @GetMapping
-    public ResponseEntity<List<PostResponse>> getAllPosts() {
-        List<PostResponse> allPosts = postService.getAllPosts();
-        return ResponseEntity.ok(allPosts);
+    public ResponseEntity<Page<PostResponse>> getAllPosts(Pageable pageable) {
+        return ResponseEntity.ok(postService.getAllPosts(pageable));
     }
 
     // READ — 단건
@@ -69,8 +69,14 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<PostResponse>> findByTitleContaining(@RequestParam String keyword) {
-        List<PostResponse> postResponses = postService.searchPosts(keyword);
+    public ResponseEntity<Page<PostResponse>> findByTitleContaining(@RequestParam String keyword, Pageable pageable) {
+        Page<PostResponse> postResponses = postService.searchPosts(keyword, pageable);
         return ResponseEntity.ok(postResponses);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<Page<PostResponse>> getMyPosts(Pageable pageable,
+                                                         @AuthenticationPrincipal String username) {
+        return ResponseEntity.ok(postService.getAllPostsByMemberId(pageable, username));
     }
 }

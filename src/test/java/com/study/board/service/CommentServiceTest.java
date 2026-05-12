@@ -24,6 +24,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +46,12 @@ class CommentServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private CacheManager cacheManager;
+
+    @Mock
+    private Cache cache;
 
     @InjectMocks
     private CommentService commentService;
@@ -85,21 +96,27 @@ class CommentServiceTest {
     @Test
     void getComments_ExistingPost_ReturnsCorrectCommentList() {
         when(postRepository.existsById(1L)).thenReturn(true);
-        when(commentRepository.findByPostId(1L)).thenReturn(List.of(
+        List<Comment> comments = List.of(
                 new Comment("test1", new Post("dummy", "dummy", member), member),
                 new Comment("test2", new Post("dummy", "dummy", member), member)
-        ));
+        );
+        when(commentRepository.findByPostIdWithMember(1L, PageRequest.of(0, 20))).thenReturn(
+                new PageImpl<>(comments, PageRequest.of(0, 20), comments.size())
+        );
 
-        List<CommentResponse> comments = commentService.getComments(1L);
+        Page<CommentResponse> result = commentService.getComments(1L, PageRequest.of(0, 20));
 
-        assertThat(comments.get(0).author()).isEqualTo("dummy");
-        assertThat(comments.get(0).content()).isEqualTo("test1");
-        assertThat(comments.get(1).content()).isEqualTo("test2");
+        assertThat(result.getTotalPages()).isEqualTo(1);
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        List<CommentResponse> list = result.get().toList();
+
+        assertThat(list.get(0).content()).isEqualTo("test1");
+        assertThat(list.get(1).content()).isEqualTo("test2");
     }
 
     @Test
     void getComments_NonExistingPost_ThrowsResourceNotFoundException() {
-        assertThatThrownBy(() -> commentService.getComments(1L))
+        assertThatThrownBy(() -> commentService.getComments(1L, PageRequest.of(0, 20)))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(" 게시글을 찾을 수 없습니다.");
     }
@@ -198,16 +215,17 @@ class CommentServiceTest {
 
     @Test
     void deleteCommentForced_ValidRequest_DeletesComment() {
-        when(commentRepository.existsById(1L)).thenReturn(true);
+        ReflectionTestUtils.setField(post, "id", 1L);
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        when(cacheManager.getCache("posts")).thenReturn(cache);
 
         commentService.deleteCommentForced(1L);
-        verify(commentRepository).deleteById(1L);
+        verify(commentRepository).delete(comment);
+        verify(cache).evict(post.getId());
     }
 
     @Test
     void deleteCommentForced_NonExistingComment_ThrowsResourceNotFoundException() {
-        when(commentRepository.existsById(1L)).thenReturn(false);
-
         assertThatThrownBy(() -> commentService.deleteCommentForced(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(" 댓글을 찾을 수 없습니다.");

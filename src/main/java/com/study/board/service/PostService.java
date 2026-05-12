@@ -9,7 +9,10 @@ import com.study.board.exception.ResourceNotFoundException;
 import com.study.board.exception.UnauthorizedAccessException;
 import com.study.board.repository.MemberRepository;
 import com.study.board.repository.PostRepository;
-import java.util.List;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,18 +38,19 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> getAllPosts() {
-        return postRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(PostResponse::from)
-                .toList();
+    public Page<PostResponse> getAllPosts(Pageable pageable) {
+        return postRepository.findAllWithMember(pageable)
+                .map(PostResponse::from);
     }
 
+    @Cacheable("posts")
     @Transactional(readOnly = true)
     public PostResponse getPost(Long id) {
         return PostResponse.from(postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id + " 게시글을 찾을 수 없습니다.")));
     }
 
+    @CacheEvict(value = "posts", key = "#id")
     @Transactional
     public PostResponse updatePost(Long id, PostUpdateRequest request, String username) {
         Post post = postRepository.findById(id)
@@ -62,6 +66,7 @@ public class PostService {
         return PostResponse.from(post);
     }
 
+    @CacheEvict(value = "posts", key = "#id")
     @Transactional
     public void deletePost(Long id, String username) {
         Post post = postRepository.findById(id)
@@ -74,6 +79,7 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
+    @CacheEvict(value = "posts")
     @Transactional
     public void deletePostForced(Long id) {
         if (!postRepository.existsById(id)) {
@@ -84,10 +90,17 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> searchPosts(String keyword) {
-        return postRepository.findByTitleContaining(keyword).stream()
-                .map(PostResponse::from)
-                .toList();
+    public Page<PostResponse> searchPosts(String keyword, Pageable pageable) {
+        return postRepository.findByTitleContaining(keyword, pageable)
+                .map(PostResponse::from);
     }
 
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getAllPostsByMemberId(Pageable pageable, String username) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다"));
+
+        return postRepository.findByMemberIdWithMember(pageable, member.getId())
+                .map(PostResponse::from);
+    }
 }

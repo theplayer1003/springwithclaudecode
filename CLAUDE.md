@@ -139,14 +139,14 @@
 
 **목표:** 테스트 코드 작성법을 익힌다.
 
-- [ ] JUnit 5 기본
-- [ ] 단위 테스트 (Service 계층, Mockito)
-- [ ] `@SpringBootTest` 통합 테스트
-- [ ] `@WebMvcTest` 컨트롤러 테스트
-- [ ] 테스트 커버리지 확인
-- [ ] 직접 도전 과제 수행
-- [ ] 코드 리뷰 및 리팩토링
-- [ ] Phase 5 학습 문서 작성 및 리뷰
+- [x] JUnit 5 기본
+- [x] 단위 테스트 (Service 계층, Mockito)
+- [x] `@SpringBootTest` 통합 테스트
+- [x] `@WebMvcTest` 컨트롤러 테스트
+- [x] 테스트 커버리지 확인
+- [x] 직접 도전 과제 수행
+- [x] 코드 리뷰 및 리팩토링
+- [x] Phase 5 학습 문서 작성 및 리뷰
 
 ## Phase 6: 성능과 캐싱 (3~4일)
 

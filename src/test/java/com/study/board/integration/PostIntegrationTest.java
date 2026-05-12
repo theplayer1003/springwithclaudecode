@@ -12,10 +12,12 @@ import com.study.board.exception.ResourceNotFoundException;
 import com.study.board.exception.UnauthorizedAccessException;
 import com.study.board.repository.MemberRepository;
 import com.study.board.service.PostService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -30,12 +32,21 @@ class PostIntegrationTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private CacheManager cacheManager;
+
     @BeforeEach
     void setup() {
-        memberRepository.save(new Member("username", "password", "USER"));
+        memberRepository.save(new Member("username", "password", "user@study.com"));
 
         postResponse = postService.createPost(new PostCreateRequest("test", "테스트용 게시글입니다."),
                 "username");
+    }
+
+    @AfterEach
+    void tearDown() {
+        cacheManager.getCacheNames()
+                .forEach(cacheName -> cacheManager.getCache(cacheName).clear());
     }
 
     @Test
@@ -51,16 +62,18 @@ class PostIntegrationTest {
 
     @Test
     void getPost_NonExistingId_ThrowsResourceNotFoundException() {
-        assertThatThrownBy(() -> postService.getPost(2L))
+        assertThatThrownBy(() -> postService.getPost(postResponse.id() + 1))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("2 게시글을 찾을 수 없습니다.");
+                .hasMessageContaining((postResponse.id() + 1) + " 게시글을 찾을 수 없습니다.");
     }
 
     @Test
     void updatePost_NonExistingId_ThrowsResourceNotFoundException() {
-        assertThatThrownBy(() -> postService.updatePost(2L, new PostUpdateRequest("수정하려는 제목", "수정하려는 내용"), "username"))
+        assertThatThrownBy(
+                () -> postService.updatePost(postResponse.id() + 1, new PostUpdateRequest("수정하려는 제목", "수정하려는 내용"),
+                        "username"))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("2 게시글을 찾을 수 없습니다.");
+                .hasMessageContaining((postResponse.id() + 1) + " 게시글을 찾을 수 없습니다.");
     }
 
     @Test

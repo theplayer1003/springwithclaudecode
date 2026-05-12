@@ -5,7 +5,8 @@ import com.study.board.dto.CommentResponse;
 import com.study.board.dto.CommentUpdateRequest;
 import com.study.board.service.CommentService;
 import jakarta.validation.Valid;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -42,8 +43,9 @@ public class CommentController {
     // READ — 특정 게시글의 댓글 목록
     // GET /posts/1/comments
     @GetMapping
-    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable Long postId) {
-        List<CommentResponse> comments = commentService.getComments(postId);
+    public ResponseEntity<Page<CommentResponse>> getComments(@PathVariable Long postId, Pageable pageable) {
+        Page<CommentResponse> comments = commentService.getComments(postId, pageable);
+
         return ResponseEntity.ok(comments);
     }
 
