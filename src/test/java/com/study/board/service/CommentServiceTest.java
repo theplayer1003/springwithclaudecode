@@ -18,7 +18,6 @@ import com.study.board.repository.MemberRepository;
 import com.study.board.repository.PostRepository;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,10 +32,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
-
-    private Member member;
-    private Post post;
-    private Comment comment;
 
     @Mock
     private PostRepository postRepository;
@@ -53,175 +48,258 @@ class CommentServiceTest {
     @Mock
     private Cache cache;
 
+    @Mock
+    private CommentNotificationService commentNotificationService;
+
     @InjectMocks
     private CommentService commentService;
 
-    @BeforeEach
-    void setUp() {
-        member = new Member("dummy", "dummy", "dummy");
-        post = new Post("dummy", "dummy", member);
-        comment = new Comment("test", post, member);
-    }
-
     @Test
     void createComment_ValidRequest_ReturnsCreatedComment() {
-        when(postRepository.findById(1L)).thenReturn(
-                Optional.of(new Post("dummy", "dummy", member)));
-        when(memberRepository.findByUsername("dummy")).thenReturn(Optional.of(member));
+        Long postId = 1L;
+        String username = "Alice";
+        String commentContent = "댓글 내용";
 
-        CommentResponse comment = commentService.createComment(1L, new CommentCreateRequest("test"), "dummy");
+        Member alice = createMember(1L, username, "alice@email.com");
+        Post post = createPost(postId, "게시글 제목", "게시글 본문", alice);
 
-        assertThat(comment.author()).isEqualTo("dummy");
-        assertThat(comment.content()).isEqualTo("test");
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(alice));
+
+        CommentResponse response = commentService.createComment(postId, new CommentCreateRequest(commentContent),
+                username);
+
+        assertThat(response.author()).isEqualTo(username);
+        assertThat(response.content()).isEqualTo(commentContent);
     }
+
 
     @Test
     void createComment_NonExistingMember_ThrowsResourceNotFoundException() {
-        when(postRepository.findById(1L)).thenReturn(
-                Optional.of(new Post("dummy", "dummy", member)));
+        Long postId = 1L;
+        String username = "Alice";
+        String commentContent = "댓글 내용";
+        String nonExistingUsername = "존재하지 않는 사용자이름";
+
+        Member alice = createMember(1L, username, "alice@email.com");
+        Post post = createPost(postId, "게시글 제목", "게시글 본문", alice);
+
+        when(postRepository.findById(postId)).thenReturn(
+                Optional.of(post));
 
         assertThatThrownBy(
-                () -> commentService.createComment(1L, new CommentCreateRequest("test"), "nonExistingUsername"))
+                () -> commentService.createComment(postId, new CommentCreateRequest(commentContent),
+                        nonExistingUsername))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("해당 회원을 찾을 수 없습니다");
     }
 
     @Test
     void createComment_NonExistingPost_ThrowsResourceNotFoundException() {
-        assertThatThrownBy(() -> commentService.createComment(1L, new CommentCreateRequest("test"), "dummy"))
+        Long nonExistingPostId = 999L;
+        String commentContent = "댓글 내용";
+
+        assertThatThrownBy(
+                () -> commentService.createComment(nonExistingPostId, new CommentCreateRequest(commentContent),
+                        "username"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(" 게시글을 찾을 수 없습니다.");
     }
 
     @Test
     void getComments_ExistingPost_ReturnsCorrectCommentList() {
-        when(postRepository.existsById(1L)).thenReturn(true);
-        List<Comment> comments = List.of(
-                new Comment("test1", new Post("dummy", "dummy", member), member),
-                new Comment("test2", new Post("dummy", "dummy", member), member)
+        Long postId = 1L;
+        String username = "Alice";
+        String commentContent1 = "댓글 내용1";
+        String commentContent2 = "댓글 내용2";
+
+        PageRequest pageRequest = PageRequest.of(0, 20);
+        Member alice = createMember(1L, username, "alice@email.com");
+        Post post = createPost(postId, "게시글 제목", "게시글 본문", alice);
+        List<Comment> comments = List.of(createComment(1L, commentContent1, post, alice),
+                createComment(2L, commentContent2, post, alice));
+
+        when(postRepository.existsById(postId)).thenReturn(true);
+        when(commentRepository.findByPostIdWithMember(postId, pageRequest)).thenReturn(
+                new PageImpl<>(comments, pageRequest, comments.size())
         );
-        when(commentRepository.findByPostIdWithMember(1L, PageRequest.of(0, 20))).thenReturn(
-                new PageImpl<>(comments, PageRequest.of(0, 20), comments.size())
-        );
 
-        Page<CommentResponse> result = commentService.getComments(1L, PageRequest.of(0, 20));
+        Page<CommentResponse> pageResponse = commentService.getComments(postId, pageRequest);
 
-        assertThat(result.getTotalPages()).isEqualTo(1);
-        assertThat(result.getTotalElements()).isEqualTo(2);
-        List<CommentResponse> list = result.get().toList();
+        assertThat(pageResponse.getTotalPages()).isEqualTo(1);
+        assertThat(pageResponse.getTotalElements()).isEqualTo(2);
+        List<CommentResponse> list = pageResponse.get().toList();
 
-        assertThat(list.get(0).content()).isEqualTo("test1");
-        assertThat(list.get(1).content()).isEqualTo("test2");
+        assertThat(list.get(0).content()).isEqualTo(commentContent1);
+        assertThat(list.get(1).content()).isEqualTo(commentContent2);
     }
 
     @Test
     void getComments_NonExistingPost_ThrowsResourceNotFoundException() {
-        assertThatThrownBy(() -> commentService.getComments(1L, PageRequest.of(0, 20)))
+        Long nonExistingPostId = 999L;
+
+        assertThatThrownBy(() -> commentService.getComments(nonExistingPostId, PageRequest.of(0, 20)))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(" 게시글을 찾을 수 없습니다.");
     }
 
     @Test
     void getComment_ExistingCommentAndPost_ReturnsCorrectComment() {
-        ReflectionTestUtils.setField(post, "id", 1L);
-        ReflectionTestUtils.setField(comment, "id", 1L);
-        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        String username = "Alice";
+        Long postId = 1L;
+        Long commentId = 1L;
+        String commentContent = "댓글 내용";
 
-        CommentResponse commentResponse = commentService.getComment(1L, 1L);
+        Member alice = createMember(1L, username, "alice@email.com");
+        Post post = createPost(postId, "게시글 제목", "게시글 본문", alice);
+        Comment comment = createComment(commentId, commentContent, post, alice);
 
-        assertThat(commentResponse.content()).isEqualTo(comment.getContent());
-        assertThat(commentResponse.author()).isEqualTo(comment.getAuthor());
-        assertThat(commentResponse.id()).isEqualTo(comment.getId());
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        CommentResponse commentResponse = commentService.getComment(postId, commentId);
+
+        assertThat(commentResponse.content()).isEqualTo(commentContent);
+        assertThat(commentResponse.author()).isEqualTo(username);
+        assertThat(commentResponse.id()).isEqualTo(commentId);
     }
 
     @Test
     void getComment_NonExistingComment_ThrowsResourceNotFoundException() {
-        assertThatThrownBy(() -> commentService.getComment(1L, 1L))
+        Long postId = 1L;
+        Long commentId = 1L;
+
+        assertThatThrownBy(() -> commentService.getComment(postId, commentId))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(" 댓글을 찾을 수 없습니다.");
     }
 
     @Test
     void getComment_PostCommentMismatch_ThrowsResourceNotFoundException() {
-        ReflectionTestUtils.setField(post, "id", 1L);
-        ReflectionTestUtils.setField(comment, "id", 1L);
-        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        String username = "Alice";
+        Long postId = 1L;
+        Long mismatchPostId = 2L;
+        Long commentId = 1L;
+        String commentContent = "댓글 내용";
 
-        assertThatThrownBy(() -> commentService.getComment(2L, 1L))
+        Member alice = createMember(1L, username, "alice@email.com");
+        Post post = createPost(postId, "게시글 제목", "게시글 본문", alice);
+        Comment comment = createComment(commentId, commentContent, post, alice);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        assertThatThrownBy(() -> commentService.getComment(mismatchPostId, commentId))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("게시글 댓글 불일치 오류");
     }
 
     @Test
     void updateComment_ValidRequest_ReturnsUpdatedComment() {
-        ReflectionTestUtils.setField(post, "id", 1L);
-        ReflectionTestUtils.setField(comment, "id", 1L);
-        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        String username = "Alice";
+        Long postId = 1L;
+        Long commentId = 1L;
+        String originalCommentContent = "댓글 내용";
+        String updateCommentContent = "변경된 댓글 내용";
 
-        CommentResponse commentResponse = commentService.updateComment(1L, 1L,
-                new CommentUpdateRequest("update content"), "dummy");
+        Member alice = createMember(1L, username, "alice@email.com");
+        Post post = createPost(postId, "게시글 제목", "게시글 본문", alice);
+        Comment comment = createComment(commentId, originalCommentContent, post, alice);
 
-        assertThat(commentResponse.id()).isEqualTo(comment.getId());
-        assertThat(commentResponse.author()).isEqualTo(comment.getAuthor());
-        assertThat(commentResponse.content()).isEqualTo("update content");
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        CommentResponse commentResponse = commentService.updateComment(postId, commentId,
+                new CommentUpdateRequest(updateCommentContent), username);
+
+        assertThat(commentResponse.id()).isEqualTo(commentId);
+        assertThat(commentResponse.author()).isEqualTo(username);
+        assertThat(commentResponse.content()).isNotEqualTo(originalCommentContent);
+        assertThat(commentResponse.content()).isEqualTo(updateCommentContent);
     }
 
     @Test
     void updateComment_NonExistingComment_ThrowsResourceNotFoundException() {
-        assertThatThrownBy(() -> commentService.updateComment(1L, 1L, new CommentUpdateRequest("dummy"), "username"))
+        Long postId = 1L;
+        Long commentId = 1L;
+
+        assertThatThrownBy(
+                () -> commentService.updateComment(postId, commentId, new CommentUpdateRequest("변경된 댓글 내용"), "사용자 이름"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(" 댓글을 찾을 수 없습니다.");
     }
 
     @Test
     void updateComment_ByNonAuthor_ThrowsUnauthorizedAccessException() {
-        ReflectionTestUtils.setField(post, "id", 1L);
-        ReflectionTestUtils.setField(comment, "id", 1L);
-        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        Long postId = 1L;
+        Long commentId = 1L;
+
+        Member alice = createMember(1L, "Alice", "alice@email.com");
+        Post post = createPost(postId, "게시글 제목", "게시글 본문", alice);
+        Comment comment = createComment(commentId, "댓글 내용", post, alice);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         assertThatThrownBy(
-                () -> commentService.updateComment(1L, 1L, new CommentUpdateRequest("update content"), "NonAthor"))
+                () -> commentService.updateComment(postId, commentId, new CommentUpdateRequest("변경된 댓글 내용"), "권한이 없는 사용자"))
                 .isInstanceOf(UnauthorizedAccessException.class)
                 .hasMessageContaining("댓글을 수정할 권한이 없습니다");
     }
 
     @Test
     void deleteComment_ValidRequest_DeletesComment() {
-        ReflectionTestUtils.setField(post, "id", 1L);
-        ReflectionTestUtils.setField(comment, "id", 1L);
-        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        String username = "Alice";
+        Long postId = 1L;
+        Long commentId = 1L;
 
-        commentService.deleteComment(1L, 1L, "dummy");
+        Member alice = createMember(1L, username, "alice@email.com");
+        Post post = createPost(postId, "게시글 제목", "게시글 본문", alice);
+        Comment comment = createComment(commentId, "댓글 내용", post, alice);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        commentService.deleteComment(postId, commentId, username);
         verify(commentRepository).delete(comment);
     }
 
     @Test
     void deleteComment_ByNonAuthor_ThrowsUnauthorizedAccessException() {
-        ReflectionTestUtils.setField(post, "id", 1L);
-        ReflectionTestUtils.setField(comment, "id", 1L);
-        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        Long postId = 1L;
+        Long commentId = 1L;
 
-        assertThatThrownBy(() -> commentService.deleteComment(1L, 1L, "nonAuthor"))
+        Member alice = createMember(1L, "Alice", "alice@email.com");
+        Post post = createPost(postId, "게시글 제목", "게시글 본문", alice);
+        Comment comment = createComment(commentId, "댓글 내용", post, alice);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        assertThatThrownBy(() -> commentService.deleteComment(postId, commentId, "nonAuthor"))
                 .isInstanceOf(UnauthorizedAccessException.class)
                 .hasMessageContaining("댓글을 삭제할 권한이 없습니다");
     }
 
     @Test
     void deleteComment_NonExistingComment_ThrowsResourceNotFoundException() {
-        assertThatThrownBy(() -> commentService.deleteComment(1L, 1L, "username"))
+        Long postId = 1L;
+        Long commentId = 1L;
+
+        assertThatThrownBy(() -> commentService.deleteComment(postId, commentId, "username"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(" 댓글을 찾을 수 없습니다.");
     }
 
     @Test
     void deleteCommentForced_ValidRequest_DeletesComment() {
-        ReflectionTestUtils.setField(post, "id", 1L);
-        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        Long postId = 1L;
+        Long commentId = 1L;
+
+        Member alice = createMember(1L, "Alice", "alice@email.com");
+        Post post = createPost(postId, "게시글 제목", "게시글 본문", alice);
+        Comment comment = createComment(commentId, "댓글 내용", post, alice);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
         when(cacheManager.getCache("posts")).thenReturn(cache);
 
-        commentService.deleteCommentForced(1L);
+        commentService.deleteCommentForced(commentId);
         verify(commentRepository).delete(comment);
-        verify(cache).evict(post.getId());
+        verify(cache).evict(postId);
     }
 
     @Test
@@ -229,5 +307,55 @@ class CommentServiceTest {
         assertThatThrownBy(() -> commentService.deleteCommentForced(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(" 댓글을 찾을 수 없습니다.");
+    }
+
+    @Test
+    void createComment_ValidRequest_CallNotifyNewComment(){
+        String aliceUsername = "Alice";
+        String aliceEmail = "alice@email.com";
+        String bobUsername = "Bob";
+        String bobEmail = "bob@email.com";
+        String commentContent = "Bob 이 쓴 댓글 내용";
+        Long alicePostId = 1L;
+
+        Member alice = createMember(1L, aliceUsername, aliceEmail);
+        Member bob = createMember(2L, bobUsername, bobEmail);
+        Post post = createPost(alicePostId, "Alice가 쓴 게시글 제목", "Alice가 쓴 게시글 본문", alice);
+
+        when(postRepository.findById(alicePostId)).thenReturn(
+                Optional.of(post));
+        when(memberRepository.findByUsername(bobUsername)).thenReturn(Optional.of(bob));
+
+        commentService.createComment(alicePostId, new CommentCreateRequest(commentContent), bobUsername);
+
+        verify(commentNotificationService).notifyNewComment(aliceEmail, bobUsername, commentContent);
+    }
+
+    private Member createMember(Long memberId, String username, String password, String email) {
+        Member member = new Member(username, password, email);
+        ReflectionTestUtils.setField(member, "id", memberId);
+
+        return member;
+    }
+
+    private Member createMember(long memberId, String username, String email) {
+        Member member = new Member(username, "password1234!@#$", email);
+        ReflectionTestUtils.setField(member, "id", memberId);
+
+        return member;
+    }
+
+    private Post createPost(Long postId, String title, String content, Member member) {
+        Post post = new Post(title, content, member);
+        ReflectionTestUtils.setField(post, "id", postId);
+
+        return post;
+    }
+
+    private Comment createComment(Long commentId, String content, Post post, Member member) {
+        Comment comment = new Comment(content, post, member);
+        ReflectionTestUtils.setField(comment, "id", commentId);
+
+        return comment;
     }
 }

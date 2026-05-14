@@ -25,13 +25,16 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final CacheManager cacheManager;
+    private final CommentNotificationService commentNotificationService;
 
     public CommentService(PostRepository postRepository, CommentRepository commentRepository,
-                          MemberRepository memberRepository, CacheManager cacheManager) {
+                          MemberRepository memberRepository, CacheManager cacheManager,
+                          CommentNotificationService commentNotificationService) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.memberRepository = memberRepository;
         this.cacheManager = cacheManager;
+        this.commentNotificationService = commentNotificationService;
     }
 
     @CacheEvict(value = "posts", key = "#postId")
@@ -43,6 +46,11 @@ public class CommentService {
 
         Comment comment = new Comment(request.content(), post, member);
         commentRepository.save(comment);
+
+        if (!post.isAuthor(member.getId())) {
+            commentNotificationService.notifyNewComment(post.getEmail(), member.getUsername(),
+                    request.content());
+        }
 
         return CommentResponse.from(comment);
     }
