@@ -69,6 +69,10 @@
 - [스레드 풀 vs 커넥션 풀](phase7/QA_스레드풀_vs_커넥션풀.md) — 풀링 패턴, 재사용 자원 차이, 풀 가득 찼을 때 동작(대기 vs 거부 정책)
 - [CountDownLatch](phase7/QA_CountDownLatch.md) — 자바 표준 동기화 도구, 비동기 테스트에서의 활용 패턴
 
+## 메시지 큐 / 메시징
+
+- [RabbitMQ vs Kafka](phase7/QA_RabbitMQ_vs_Kafka.md) — 두 도구의 본질 차이, 개념 매칭, 같은 시나리오의 코드 비교, 각자 강한 시나리오
+
 ## 테스트 (계속)
 
 - [Mockito Spy와 @Async 충돌](phase7/QA_Mockito_Spy와_Async_충돌.md) — @SpyBean + @Async가 동작하지 않는 함정, CGLIB와 mockito 인터셉터 충돌, interface 분리 해결책

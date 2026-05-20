@@ -52,7 +52,8 @@ class PostServiceTest {
                         "dummy",
                         new Member("dummy",
                                 "dummy",
-                                "dummy")));
+                                "dummy",
+                                "010-0000-0000")));
         when(postRepository.findById(1L)).thenReturn(post);
 
         PostResponse response = postService.getPost(1L);
@@ -69,7 +70,8 @@ class PostServiceTest {
                         "dummy",
                         new Member("dummy",
                                 "dummy",
-                                "dummy")));
+                                "dummy",
+                                "010-0000-0000")));
         when(postRepository.findById(1L)).thenReturn(post);
 
         postService.deletePost(1L, "dummy");
@@ -92,7 +94,8 @@ class PostServiceTest {
                         "dummy",
                         new Member("dummy",
                                 "dummy",
-                                "dummy")));
+                                "dummy",
+                                "010-0000-0000")));
         when(postRepository.findById(1L)).thenReturn(post);
 
         assertThatThrownBy(() -> postService.deletePost(1L, "nonAuthor"))
@@ -120,8 +123,8 @@ class PostServiceTest {
     @Test
     void searchPosts_MatchingKeyword_ReturnsMatchedPosts() {
         List<Post> posts = List.of(
-                new Post("테스트 게시글1", "테스트 용입니다.", new Member("test", "test", "test")),
-                new Post("테스트 게시글2", "테스트 용입니다.", new Member("test", "test", "test"))
+                new Post("테스트 게시글1", "테스트 용입니다.", new Member("test", "test", "test", "010-0000-0000")),
+                new Post("테스트 게시글2", "테스트 용입니다.", new Member("test", "test", "test", "010-0000-0000"))
         );
         when(postRepository.findByTitleContaining("dummy", PageRequest.of(0, 20))).thenReturn(
                 new PageImpl<>(posts));
@@ -155,7 +158,7 @@ class PostServiceTest {
 
     @Test
     void getAllPostsByMemberId_ExistingUsername_ReturnsAllPosts() {
-        Member member = new Member("testUser", "test", "test");
+        Member member = new Member("testUser", "test", "test", "010-0000-0000");
         ReflectionTestUtils.setField(member, "id", 1L);
         Post post = new Post("testTitle", "testContent", member);
         List<Post> posts = List.of(post);

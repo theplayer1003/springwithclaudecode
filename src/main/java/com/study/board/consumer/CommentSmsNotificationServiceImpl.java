@@ -1,4 +1,4 @@
-package com.study.board.service;
+package com.study.board.consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,13 +6,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CommentNotificationServiceImpl implements CommentNotificationService {
+public class CommentSmsNotificationServiceImpl implements CommentSmsNotificationService{
 
-    private static final Logger log = LoggerFactory.getLogger(CommentNotificationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(CommentSmsNotificationServiceImpl.class);
 
     @Override
     @Async("notificationExecutor")
-    public void notifyNewComment(String postAuthorEmail, String commentAuthor, String commentContent) {
+    public void notifyNewComment(String postAuthorPhone, String commentAuthor, String commentContent) {
         log.info("현재 스레드 이름: [{}]", Thread.currentThread().getName());
         try {
             Thread.sleep(1500);
@@ -20,6 +20,6 @@ public class CommentNotificationServiceImpl implements CommentNotificationServic
             Thread.currentThread().interrupt();
             return;
         }
-        log.info(postAuthorEmail + "로 메일을 전송했습니다.");
+        log.info(postAuthorPhone + "로 문자를 보냈습니다.");
     }
 }

@@ -16,7 +16,7 @@
 @SpringBootTest
 class CommentAsyncIntegrationTest {
     @MockitoSpyBean
-    private CommentNotificationService commentNotificationService;
+    private CommentNotificationService commentEmailNotificationService;
     
     @Test
     void test() throws InterruptedException {
@@ -28,7 +28,7 @@ class CommentAsyncIntegrationTest {
             invocation.callRealMethod();
             latch.countDown();
             return null;
-        }).when(commentNotificationService).notifyNewComment(any(), any(), any());
+        }).when(commentEmailNotificationService).notifyNewComment(any(), any(), any());
         
         commentService.createComment(...);
         
@@ -343,13 +343,13 @@ spy 대신 **mock**으로 빈을 교체. 진짜 메서드는 실행 안 됨.
 
 ```java
 @MockitoBean
-private CommentNotificationService commentNotificationService;
+private CommentNotificationService commentEmailNotificationService;
 
 @Test
 void test() {
     commentService.createComment(...);
     
-    verify(commentNotificationService, timeout(3000))
+    verify(commentEmailNotificationService, timeout(3000))
         .notifyNewComment(any(), any(), any());
 }
 ```

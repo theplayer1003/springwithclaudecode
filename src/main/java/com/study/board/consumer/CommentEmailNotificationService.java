@@ -1,7 +1,7 @@
-package com.study.board.service;
+package com.study.board.consumer;
 
 
-public interface CommentNotificationService {
+public interface CommentEmailNotificationService {
 
     void notifyNewComment(String postAuthorEmail, String commentAuthor, String commentContent);
 }

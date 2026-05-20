@@ -11,6 +11,7 @@ import com.study.board.dto.CommentUpdateRequest;
 import com.study.board.entity.Comment;
 import com.study.board.entity.Member;
 import com.study.board.entity.Post;
+import com.study.board.event.CommentCreatedEvent;
 import com.study.board.exception.ResourceNotFoundException;
 import com.study.board.exception.UnauthorizedAccessException;
 import com.study.board.repository.CommentRepository;
@@ -20,11 +21,13 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -49,7 +52,7 @@ class CommentServiceTest {
     private Cache cache;
 
     @Mock
-    private CommentNotificationService commentNotificationService;
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private CommentService commentService;
@@ -238,7 +241,8 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         assertThatThrownBy(
-                () -> commentService.updateComment(postId, commentId, new CommentUpdateRequest("변경된 댓글 내용"), "권한이 없는 사용자"))
+                () -> commentService.updateComment(postId, commentId, new CommentUpdateRequest("변경된 댓글 내용"),
+                        "권한이 없는 사용자"))
                 .isInstanceOf(UnauthorizedAccessException.class)
                 .hasMessageContaining("댓글을 수정할 권한이 없습니다");
     }
@@ -310,36 +314,48 @@ class CommentServiceTest {
     }
 
     @Test
-    void createComment_ValidRequest_CallNotifyNewComment(){
+    void createComment_ValidRequest_PublishEvent() {
         String aliceUsername = "Alice";
         String aliceEmail = "alice@email.com";
         String bobUsername = "Bob";
         String bobEmail = "bob@email.com";
         String commentContent = "Bob 이 쓴 댓글 내용";
+        Long aliceId = 1L;
+        Long bobId = 2L;
         Long alicePostId = 1L;
 
-        Member alice = createMember(1L, aliceUsername, aliceEmail);
-        Member bob = createMember(2L, bobUsername, bobEmail);
+        Member alice = createMember(aliceId, aliceUsername, aliceEmail);
+        Member bob = createMember(bobId, bobUsername, bobEmail);
         Post post = createPost(alicePostId, "Alice가 쓴 게시글 제목", "Alice가 쓴 게시글 본문", alice);
+        CommentCreateRequest commentCreateRequest = new CommentCreateRequest(commentContent);
+        ArgumentCaptor<CommentCreatedEvent> captor = ArgumentCaptor.forClass(
+                CommentCreatedEvent.class);
 
         when(postRepository.findById(alicePostId)).thenReturn(
                 Optional.of(post));
         when(memberRepository.findByUsername(bobUsername)).thenReturn(Optional.of(bob));
 
-        commentService.createComment(alicePostId, new CommentCreateRequest(commentContent), bobUsername);
+        commentService.createComment(alicePostId, commentCreateRequest, bobUsername);
 
-        verify(commentNotificationService).notifyNewComment(aliceEmail, bobUsername, commentContent);
+        verify(eventPublisher).publishEvent(captor.capture());
+
+        CommentCreatedEvent published = captor.getValue();
+        assertThat(published.postAuthorId()).isEqualTo(aliceId);
+        assertThat(published.commentAuthorId()).isEqualTo(bobId);
+        assertThat(published.postAuthorEmail()).isEqualTo(aliceEmail);
+        assertThat(published.commentUsername()).isEqualTo(bobUsername);
+        assertThat(published.commentContent()).isEqualTo(commentContent);
     }
 
     private Member createMember(Long memberId, String username, String password, String email) {
-        Member member = new Member(username, password, email);
+        Member member = new Member(username, password, email, "010-0000-0000");
         ReflectionTestUtils.setField(member, "id", memberId);
 
         return member;
     }
 
     private Member createMember(long memberId, String username, String email) {
-        Member member = new Member(username, "password1234!@#$", email);
+        Member member = new Member(username, "password1234!@#$", email, "010-0000-0000");
         ReflectionTestUtils.setField(member, "id", memberId);
 
         return member;

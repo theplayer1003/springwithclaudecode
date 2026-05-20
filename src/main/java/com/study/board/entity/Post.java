@@ -115,4 +115,12 @@ public class Post {
     public boolean isAuthor(Long memberId) {
         return member.getId().equals(memberId);
     }
+
+    public Long getAuthorId() {
+        return member.getId();
+    }
+
+    public String getPhone() {
+        return member.getPhone();
+    }
 }

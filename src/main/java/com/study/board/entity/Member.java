@@ -23,16 +23,19 @@ public class Member {
 
     private String email;
 
+    private String phone;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
     protected Member() {
     }
 
-    public Member(String username, String password, String email) {
+    public Member(String username, String password, String email, String phone) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.phone = phone;
         this.role = Role.USER;
     }
 
@@ -61,5 +64,9 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    public String getPhone() {
+        return phone;
     }
 }

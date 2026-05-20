@@ -6,6 +6,7 @@ import com.study.board.dto.CommentUpdateRequest;
 import com.study.board.entity.Comment;
 import com.study.board.entity.Member;
 import com.study.board.entity.Post;
+import com.study.board.event.CommentCreatedEvent;
 import com.study.board.exception.ResourceNotFoundException;
 import com.study.board.exception.UnauthorizedAccessException;
 import com.study.board.repository.CommentRepository;
@@ -14,6 +15,7 @@ import com.study.board.repository.PostRepository;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,16 +27,16 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final CacheManager cacheManager;
-    private final CommentNotificationService commentNotificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public CommentService(PostRepository postRepository, CommentRepository commentRepository,
                           MemberRepository memberRepository, CacheManager cacheManager,
-                          CommentNotificationService commentNotificationService) {
+                          ApplicationEventPublisher applicationEventPublisher) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.memberRepository = memberRepository;
         this.cacheManager = cacheManager;
-        this.commentNotificationService = commentNotificationService;
+        this.eventPublisher = applicationEventPublisher;
     }
 
     @CacheEvict(value = "posts", key = "#postId")
@@ -47,10 +49,8 @@ public class CommentService {
         Comment comment = new Comment(request.content(), post, member);
         commentRepository.save(comment);
 
-        if (!post.isAuthor(member.getId())) {
-            commentNotificationService.notifyNewComment(post.getEmail(), member.getUsername(),
-                    request.content());
-        }
+        eventPublisher.publishEvent(new CommentCreatedEvent(post.getAuthorId(), member.getId(),
+                post.getEmail(), post.getPhone(), username, request.content()));
 
         return CommentResponse.from(comment);
     }

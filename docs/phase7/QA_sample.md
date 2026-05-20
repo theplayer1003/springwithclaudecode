@@ -15,7 +15,7 @@ doAnswer(invocation -> {
             invocation.callRealMethod();
             latch.countDown();
             return null;
-        }).when(commentNotificationService).notifyNewComment(any(), any(), any());
+        }).when(commentEmailNotificationService).notifyNewComment(any(), any(), any());
 ```
 
 doAnswer 는 다르게 수행하고자 하는 동작 정의, when 절이 모킹할 대상임.
@@ -50,7 +50,7 @@ mockito 는 모키토 대로 스파이를 위한 프록시 객체를 만듬. 이
 그리고 모키토가 스파이를 만드려고 함. 이미 스프링이 프록시로 원본 객체를 덮어놨기 때문에 프록시를 spy 로 인식함.
 그치만 원본 객체가 아니라 stubbing 등록에 실패함.(CGLIB 클래스를 mockito 가 가로채기 어렵단게 무슨 뜻? 어째서 그렇게 되는거임?)
 
-테스트가 실행되고 commentNotificationService 의 메서드가 호출되면 스프링 프록시가 이를 받음.
+테스트가 실행되고 commentEmailNotificationService 의 메서드가 호출되면 스프링 프록시가 이를 받음.
 @Async 동작 원리에 의해 TaksExecutor 한테 작업을 주고... 우리가 작성한대로 일을 처리함.
 stubbing 등록이 안되어 있기 때문에 doAnswer 의 람다가 실행되지 않고 latch 의 카운트가 줄어들지 않음.
 테스트가 실패함.
