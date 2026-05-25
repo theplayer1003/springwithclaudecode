@@ -46,7 +46,8 @@ class PostControllerTest {
     void getPost_FindExistsEntity_ReturnsCorrectEntity() throws Exception {
         when(postService.getPost(1L)).thenReturn(PostResponse.from(new Post("dummy", "dummy", new Member("dummy",
                 "dummy",
-                "dummy"))));
+                "dummy",
+                "010-0000-0000"))));
 
         mockMvc.perform(get("/posts/1"))
                 .andExpect(status().isOk())
@@ -66,7 +67,8 @@ class PostControllerTest {
         List<PostResponse> responses = List.of(
                 PostResponse.from(new Post("dummy", "dummy", new Member("dummy",
                         "dummy",
-                        "dummy"))));
+                        "dummy",
+                        "010-0000-0000"))));
 
         when(postService.getAllPosts(any(Pageable.class))).thenReturn(
                 new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));

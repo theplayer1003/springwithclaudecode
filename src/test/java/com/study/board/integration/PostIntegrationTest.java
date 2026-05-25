@@ -37,7 +37,7 @@ class PostIntegrationTest {
 
     @BeforeEach
     void setup() {
-        memberRepository.save(new Member("username", "password", "user@study.com"));
+        memberRepository.save(new Member("username", "password", "user@study.com", "010-0000-0000"));
 
         postResponse = postService.createPost(new PostCreateRequest("test", "테스트용 게시글입니다."),
                 "username");

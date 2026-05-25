@@ -107,4 +107,20 @@ public class Post {
     public String getAuthor() {
         return member.getUsername();
     }
+
+    public String getEmail() {
+        return member.getEmail();
+    }
+
+    public boolean isAuthor(Long memberId) {
+        return member.getId().equals(memberId);
+    }
+
+    public Long getAuthorId() {
+        return member.getId();
+    }
+
+    public String getPhone() {
+        return member.getPhone();
+    }
 }

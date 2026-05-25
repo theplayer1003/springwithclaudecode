@@ -34,7 +34,7 @@ public class AuthService {
 
         String encodedPassword = passwordEncoder.encode(request.password());
 
-        Member member = new Member(request.username(), encodedPassword, request.email());
+        Member member = new Member(request.username(), encodedPassword, request.email(), "010-0000-0000");
         memberRepository.save(member);
 
         return MemberResponse.from(member);
