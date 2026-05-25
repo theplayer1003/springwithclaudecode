@@ -63,6 +63,7 @@
 
 - [AOP와 프록시 메커니즘](phase7/QA_AOP_프록시_메커니즘.md) — @Transactional/@Cacheable/@PreAuthorize/@Async 공통 메커니즘, 자기 호출 문제, private/final 제약
 - [프록시 — JDK Dynamic Proxy vs CGLIB](phase7/QA_프록시_JDK_vs_CGLIB.md) — 두 프록시 구현 방식의 동작 원리, Spring 자동 선택 기준, 각 방식의 제약
+- [@EventListener 어댑터 메커니즘](phase7/QA_EventListener_어댑터_메커니즘.md) — 프록시 vs 어댑터 패턴 차이, 리플렉션 기반 메서드 변환, 이벤트 타입은 메서드 파라미터에서 자동 추출
 
 ## 비동기 / 동시성
 
@@ -72,6 +73,14 @@
 ## 메시지 큐 / 메시징
 
 - [RabbitMQ vs Kafka](phase7/QA_RabbitMQ_vs_Kafka.md) — 두 도구의 본질 차이, 개념 매칭, 같은 시나리오의 코드 비교, 각자 강한 시나리오
+- [Kafka 멘탈모델과 RabbitMQ 비교](phase7/QA_Kafka_멘탈모델_RabbitMQ_비교.md) — Consumer Group/파티션의 본질, RabbitMQ 사고로 Kafka를 이해할 때의 함정, 부하 분산/메시지 영속성/구독 모델의 정반대 방향
+- [Kafka Consumer Group](phase7/QA_Kafka_Consumer_Group.md) — 컨슈머 협력 단위의 의미, 같은 그룹 안의 부하 분산과 다른 그룹 사이의 독립성, 파티션이 존재하는 세 가지 이유
+- [분리의 축들](phase7/QA_분리의_축들.md) — 시간/결합도/프로세스 축의 직교성, 각 축이 푸는 결합의 종류, 호출자 관점의 분리 완성 시점
+- [RabbitListener와 Async 안티패턴](phase7/QA_RabbitListener_Async_안티패턴.md) — 메시지 큐의 ack 약속, @RabbitListener 안에서 @Async 호출 시 ack 타이밍 어긋남, 영속 큐에서 휘발 큐로 메시지를 옮기는 위험
+- [HTTP 직접 호출 vs 메시지 큐](phase7/QA_HTTP_직접호출_vs_메시지큐.md) — HTTP 의 본질적 특성, 장애 전파의 Little's Law 메커니즘, 메시지 큐의 신뢰성과 이중 쓰기 문제
+- [Push vs Pull 모델](phase7/QA_Push_vs_Pull_모델.md) — 메시지 전달 주도권의 차이, RabbitMQ 의 Push 와 Kafka 의 Pull, 각 시스템의 본질과 시나리오 적합성
+- [분산 시스템의 이름 계약](phase7/QA_분산시스템의_이름_계약.md) — 멱등 선언의 정확한 의미와 한계, 분산 시스템의 계약 개념, 이름 어긋남의 조용한 실패
+- [Exchange Topic 패턴](phase7/QA_Exchange_Topic_패턴.md) — Fanout vs Topic 의 의도 차이, 마이크로서비스 이벤트 라우팅 시나리오, 패턴 매칭 기반 라우팅의 가치
 
 ## 테스트 (계속)
 
