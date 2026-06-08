@@ -13,6 +13,9 @@
 - [delete 메서드 차이](phase3/QA_delete_메서드_차이.md) — deleteById vs delete(entity) 쿼리 차이
 - [1차 캐시 동작 기준](review/QA_1차_캐시_동작_기준.md) — Map<ID, Entity> 구조, ID 기반 조회에서만 캐시 히트
 - [save() 메서드와 JPA 행동 시나리오](review/QA_save_메서드와_JPA_행동_시나리오.md) — persist/merge/Dirty Checking 판단 기준 5가지 시나리오
+- [Spring Data JPA 메커니즘](phase8/QA_Spring_Data_JPA_메커니즘.md) — 메서드 이름 쿼리 파싱/위치 매칭, JPQL ≠ SQL, Pageable 의 DB 측 잘라 반환, OFFSET 깊은 페이지 함정, Page size vs Chunk size, OOM 의 경험적 기준
+- [save() 의 isNew 판정과 Persistable](phase8/QA_save_isNew_Persistable.md) — id 가 미리 채워진 엔티티의 merge 함정, Persistable 우회, 추상화의 일반화 가정과 비표준 시나리오
+- [deleteById vs deleteAllByIdInBatch](phase8/QA_deleteById_vs_InBatch.md) — deleteById 의 SELECT→DELETE 메커니즘과 4가지 설계 이유, 영속성 컨텍스트 우회의 트레이드오프, 추상화 vs 성능
 
 ## Entity / 연관관계
 
@@ -85,3 +88,17 @@
 ## 테스트 (계속)
 
 - [Mockito Spy와 @Async 충돌](phase7/QA_Mockito_Spy와_Async_충돌.md) — @SpyBean + @Async가 동작하지 않는 함정, CGLIB와 mockito 인터셉터 충돌, interface 분리 해결책
+
+## 데이터 수명 주기 / 아카이빙
+
+- [아카이빙 스냅샷](phase8/QA_아카이빙_스냅샷.md) — 아카이빙의 5가지 활용 시나리오, 규모에 따른 부가/본질의 전환, 스냅샷의 본질(살아있는 도메인과의 단절), 관계 매핑이 스냅샷을 오염시키는 이유, 재사용 가능한 판단 프레임워크
+
+## 자바 기본기
+
+- [제네릭과 와일드카드 PECS](phase8/QA_제네릭_와일드카드_PECS.md) — 제네릭의 컴파일 타임 본질과 타입 소거, 불공변성, 와일드카드 3종, Producer Extends/Consumer Super, ItemWriter 의 Chunk<? extends T> 분석
+
+## 배치 처리 / Spring Batch
+
+- [OFFSET 페이지 시프트와 Keyset Pagination](phase8/QA_OFFSET_페이지_시프트_Keyset.md) — 읽으면서 변경하는 시나리오의 본질적 함정, 위치 기반 vs 값 기반의 차이, 커스텀 ItemReader 구현, lastSeenId 갱신 시점의 두 패턴
+- [Cron 표현식 함정](phase8/QA_Cron_표현식_함정.md) — Spring 의 6필드 구조, 초 필드 누락 시 폭주, 흔한 실수 표, @Scheduled 의 cron / fixedRate / fixedDelay 차이
+- [Spring Batch Step 메커니즘](phase8/QA_Spring_Batch_Step_메커니즘.md) — Chunk-oriented Step 의 내부 동작, Reader 의 버퍼링 패턴, ChunkOrientedTasklet 으로의 통일, ItemStream+ExecutionContext 의 재시작 메커니즘
