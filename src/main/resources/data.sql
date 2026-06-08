@@ -34,6 +34,23 @@ VALUES (999, 'batchTester', 'batchtest', 'batch@email.com', '010-1234-1234', 'US
 --  ('게시글30', '내용30', 999, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
+-- INSERT INTO POST (title, content, member_id, created_at, updated_at)
+-- SELECT 'post title' || X, 'post content' || X, 999, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+-- FROM SYSTEM_RANGE(1, 30);
+
+
 INSERT INTO POST (title, content, member_id, created_at, updated_at)
-SELECT 'post title' || X, 'post content' || X, 999, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-FROM SYSTEM_RANGE(1, 30);
+SELECT 'post title' || X,
+       'post content' || X,
+       999,
+       DATEADD('YEAR', -2, CURRENT_TIMESTAMP),
+       DATEADD('YEAR', -2, CURRENT_TIMESTAMP)
+FROM SYSTEM_RANGE(1, 1500);
+
+INSERT INTO POST (title, content, member_id, created_at, updated_at)
+SELECT 'post title' || X,
+       'post content' || X,
+       999,
+       CURRENT_TIMESTAMP,
+       CURRENT_TIMESTAMP
+FROM SYSTEM_RANGE(1, 1500);
