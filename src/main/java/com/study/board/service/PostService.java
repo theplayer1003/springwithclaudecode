@@ -100,7 +100,7 @@ public class PostService {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다"));
 
-        return postRepository.findByMemberIdWithMember(pageable, member.getId())
+        return postRepository.findByMemberIdWithMember(member.getId(), pageable)
                 .map(PostResponse::from);
     }
 }

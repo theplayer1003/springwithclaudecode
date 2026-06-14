@@ -1,6 +1,8 @@
 package com.study.board.repository;
 
 import com.study.board.entity.Post;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,5 +19,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAllWithMember(Pageable pageable);
 
     @Query("SELECT p FROM Post p JOIN FETCH p.member WHERE p.member.id = :memberId ORDER BY p.createdAt DESC")
-    Page<Post> findByMemberIdWithMember(Pageable pageable, @Param("memberId") Long memberId);
+    Page<Post> findByMemberIdWithMember(@Param("memberId") Long memberId, Pageable pageable);
+
+    Page<Post> findByCreatedAtBefore(LocalDateTime cutoff, Pageable pageable);
+
+    List<Post> findByCreatedAtBeforeAndIdGreaterThanOrderByIdAsc(LocalDateTime cutoff, Long lastSeenId,
+                                                                 Pageable pageable);
 }

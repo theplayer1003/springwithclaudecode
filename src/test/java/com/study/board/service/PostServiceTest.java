@@ -164,7 +164,7 @@ class PostServiceTest {
         List<Post> posts = List.of(post);
 
         when(memberRepository.findByUsername("test")).thenReturn(Optional.of(member));
-        when(postRepository.findByMemberIdWithMember(PageRequest.of(0, 20), member.getId())).thenReturn(
+        when(postRepository.findByMemberIdWithMember(member.getId(), PageRequest.of(0, 20))).thenReturn(
                 new PageImpl<>(posts, PageRequest.of(0, 20), posts.size())
         );
 
