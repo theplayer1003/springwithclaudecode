@@ -102,3 +102,7 @@
 - [OFFSET 페이지 시프트와 Keyset Pagination](phase8/QA_OFFSET_페이지_시프트_Keyset.md) — 읽으면서 변경하는 시나리오의 본질적 함정, 위치 기반 vs 값 기반의 차이, 커스텀 ItemReader 구현, lastSeenId 갱신 시점의 두 패턴
 - [Cron 표현식 함정](phase8/QA_Cron_표현식_함정.md) — Spring 의 6필드 구조, 초 필드 누락 시 폭주, 흔한 실수 표, @Scheduled 의 cron / fixedRate / fixedDelay 차이
 - [Spring Batch Step 메커니즘](phase8/QA_Spring_Batch_Step_메커니즘.md) — Chunk-oriented Step 의 내부 동작, Reader 의 버퍼링 패턴, ChunkOrientedTasklet 으로의 통일, ItemStream+ExecutionContext 의 재시작 메커니즘
+
+## OS / 시스템 / 운영
+
+- [파일 디스크립터 누수와 OS 자원 한도](phase8/QA_파일_디스크립터_누수.md) — FD 의 본질(파일·소켓·DB커넥션의 번호표), soft/hard/커널 3층 한도, 장수 프로세스의 누수 누적과 Too many open files, 프로세스 트리와 자원 회수, lsof 확인 명령어, 누수 디버깅 4단계, Actuator 모니터링 연결 (26일 켜둔 Claude Code 세션이 계기)
