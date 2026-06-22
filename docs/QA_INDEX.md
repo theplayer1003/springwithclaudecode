@@ -110,3 +110,4 @@
 ## DB / 트랜잭션 / 동시성
 
 - [Lock Escalation 과 DB 별 동작 차이](phase8/QA_Lock_Escalation과_DB별_동작차이.md) — Lock Escalation 의 정의와 트레이드오프, SQL Server/DB2(승격함) vs MySQL InnoDB/PostgreSQL(승격 안 함)의 갈림길(행 락을 메모리에 두느냐), InnoDB/PostgreSQL 에서 1억 건 단일 트랜잭션의 진짜 문제(장시간 락 점유+Undo 비대화), MVCC/Undo 의 이중 역할, "어느 DB 기준인가" 판단 프레임
+- [배치와 동시성: 락, MVCC, stale read](phase8/QA_배치와_동시성_stale_read.md) — 락은 변경 충돌을 막는 장치라 본질적으로 쓰기에 필요(읽기는 원래 필수 아님), MVCC 가 읽기 락을 스냅샷으로 대체, 그 대가인 stale read, 트랜잭션 범위 ≠ 락 범위, 락을 거느냐는 정답이 아니라 대상 성격에 따른 비즈니스 판단(아카이빙은 비활성 데이터라 무락), 비관적/낙관적 락 지도(Phase 10 예고)
