@@ -106,3 +106,7 @@
 ## OS / 시스템 / 운영
 
 - [파일 디스크립터 누수와 OS 자원 한도](phase8/QA_파일_디스크립터_누수.md) — FD 의 본질(파일·소켓·DB커넥션의 번호표), soft/hard/커널 3층 한도, 장수 프로세스의 누수 누적과 Too many open files, 프로세스 트리와 자원 회수, lsof 확인 명령어, 누수 디버깅 4단계, Actuator 모니터링 연결 (26일 켜둔 Claude Code 세션이 계기)
+
+## DB / 트랜잭션 / 동시성
+
+- [Lock Escalation 과 DB 별 동작 차이](phase8/QA_Lock_Escalation과_DB별_동작차이.md) — Lock Escalation 의 정의와 트레이드오프, SQL Server/DB2(승격함) vs MySQL InnoDB/PostgreSQL(승격 안 함)의 갈림길(행 락을 메모리에 두느냐), InnoDB/PostgreSQL 에서 1억 건 단일 트랜잭션의 진짜 문제(장시간 락 점유+Undo 비대화), MVCC/Undo 의 이중 역할, "어느 DB 기준인가" 판단 프레임
