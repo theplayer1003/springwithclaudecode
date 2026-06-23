@@ -145,6 +145,51 @@ public class ArchivedPost implements Persistable<Long> {
 
 1500번의 SELECT 가 *사라짐*.
 
+### Persistable 의 *본래 용도* — 우리의 `return true` 는 축약형
+
+여기서 한 가지 짚을 것: 우리가 쓴 `return true` (무조건 새 엔티티)는 Persistable 의 **특수 케이스이자 축약형**이다. Persistable 의 *일반적/본격적 용도*는 따로 있다.
+
+**본래 목적: "id 를 애플리케이션이 직접 할당하는 엔티티" 의 new 판정 문제를 푸는 것.**
+
+기본 `isNew()`(id null 검사)는 *`@GeneratedValue` 를 전제* 한다 — "id 는 DB 가 INSERT 때 채워주니, id 가 null 이면 아직 저장 안 된 새 엔티티" 라는 논리. 그런데 이 전제가 깨지는 엔티티들이 있다:
+
+| 상황 | 왜 기본 isNew() 가 깨지나 |
+|--|--|
+| **UUID 를 생성자/필드에서 직접 할당** | 객체 만드는 순간 id 가 이미 있음 → null 아님 → 항상 "기존" 으로 오판 |
+| **자연키/비즈니스키** (주문번호, 사업자등록번호를 PK 로) | id 가 외부에서 주어짐 → 처음부터 채워짐 |
+| **다른 엔티티의 id 를 복사** (우리 ArchivedPost) | 동일 |
+
+이런 엔티티는 *id 로는 new 여부를 알 수 없다*. 그래서 Persistable 로 *"new 인지 아닌지를 id 말고 다른 기준으로 직접 알려줘"* 라고 하는 것.
+
+**가장 전형적인 본격 패턴** (`@Transient` 플래그 + 라이프사이클 콜백):
+
+```java
+@Entity
+public class Order implements Persistable<UUID> {
+    @Id
+    private UUID id = UUID.randomUUID();    // 생성자에서 미리 할당
+
+    @Transient
+    private boolean isNew = true;           // 별도 플래그로 추적 (DB 컬럼 아님)
+
+    @Override
+    public UUID getId() { return id; }
+
+    @Override
+    public boolean isNew() { return isNew; }
+
+    @PostLoad      // DB 에서 로드된 직후
+    @PostPersist   // INSERT 된 직후
+    void markNotNew() { this.isNew = false; }
+}
+```
+
+핵심은 **"막 생성됐을 땐 true, DB 에서 읽어오거나(`@PostLoad`) 저장된 뒤(`@PostPersist`)엔 false"** 로 정확히 추적한다는 것. 그러면 같은 엔티티를 *새로 만들 땐 INSERT*, *로드 후 수정할 땐 UPDATE* 가 올바르게 갈린다.
+
+**우리가 `return true` 로 축약한 이유:** ArchivedPost 는 *오직 INSERT 만 되고, 읽어와서 수정·재저장하는 일이 절대 없는* 엔티티다. "읽어온 뒤 false 로 바꿔야 하는" 시나리오 자체가 없으니, 위의 `@Transient` 플래그 추적이 *불필요* 하다. 그래서 일반형을 *`return true` 로 단순화* 한 것. (학습자가 이 축약을 스스로 간파함 — "더 본격적인 용도가 있을 것 같다".)
+
+> 정리: **Persistable 의 본래 용도 = id 로 new 를 판정할 수 없는 엔티티(앱이 id 직접 할당)에 정확한 new 판정을 부여하는 것.** 그 일반형은 `@Transient` 플래그 + 콜백. 우리는 "INSERT 전용" 이라는 특수성 덕에 `return true` 로 축약한 케이스.
+
 ---
 
 ## 4. 안전성 — *항상 true 가 위험하지 않은가?*
